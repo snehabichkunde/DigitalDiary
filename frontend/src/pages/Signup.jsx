@@ -1,38 +1,56 @@
-import React from "react";
+import React, { useState } from "react";
+import axios from "axios";
 
 const Signup = () => {
+    const [name, setName] = useState('')
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+
+    const handdleSubmit = async (e) => {
+        e.preventDefault()
+        try {
+            const response = await axios.post('http://localhost:5000/api/auth/register', { name, email, password })
+            console.log(response)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     return (
         <div style={styles.container}>
             <div style={styles.card}>
                 <h2 style={styles.heading}>Create an Account</h2>
-                <form style={styles.form}>
+                <form style={styles.form} onSubmit={handdleSubmit}>
                     <div style={styles.inputGroup}>
                         <label htmlFor="name" style={styles.label}>Name</label>
-                        <input 
-                            type="text" 
-                            id="name" 
-                            placeholder="Enter Name" 
-                            required 
+                        <input
+                            type="text"
+                            onChange={(e) => setName(e.target.value)}
+                            id="name"
+                            placeholder="Enter Name"
+                            required
                             style={styles.input}
                         />
                     </div>
                     <div style={styles.inputGroup}>
                         <label htmlFor="email" style={styles.label}>Email</label>
-                        <input 
-                            type="email" 
-                            id="email" 
-                            placeholder="Enter Email" 
-                            required 
+                        <input
+                            type="email"
+                            onChange={(e) => setEmail(e.target.value)}
+                            id="email"
+                            placeholder="Enter Email"
+                            required
                             style={styles.input}
                         />
                     </div>
                     <div style={styles.inputGroup}>
                         <label htmlFor="password" style={styles.label}>Password</label>
-                        <input 
-                            type="password" 
-                            id="password" 
-                            placeholder="*****" 
-                            required 
+                        <input
+                            type="password"
+                            onChange={(e) => setPassword(e.target.value)}
+                            id="password"
+                            placeholder="*****"
+                            required
                             style={styles.input}
                         />
                     </div>
