@@ -1,37 +1,26 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const Signup = () => {
-    const [name, setName] = useState('')
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
+const Login = () => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
 
-    const handdleSubmit = async (e) => {
-        e.preventDefault()
+    const handleSubmit = async (e) => {
+        e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:5000/api/auth/register', { name, email, password })
-            console.log(response)
+            const response = await axios.post('http://localhost:5000/api/auth/login', { email, password });
+            console.log(response);
+            // You can handle successful login here, like redirecting or storing a token
         } catch (error) {
-            console.log(error)
+            console.log(error);
         }
-    }
+    };
 
     return (
         <div style={styles.container}>
             <div style={styles.card}>
-                <h2 style={styles.heading}>Create an Account</h2>
-                <form style={styles.form} onSubmit={handdleSubmit}>
-                    <div style={styles.inputGroup}>
-                        <label htmlFor="name" style={styles.label}>Name</label>
-                        <input
-                            type="text"
-                            onChange={(e) => setName(e.target.value)}
-                            id="name"
-                            placeholder="Enter Name"
-                            required
-                            style={styles.input}
-                        />
-                    </div>
+                <h2 style={styles.heading}>Log In to Your Account</h2>
+                <form style={styles.form} onSubmit={handleSubmit}>
                     <div style={styles.inputGroup}>
                         <label htmlFor="email" style={styles.label}>Email</label>
                         <input
@@ -54,11 +43,11 @@ const Signup = () => {
                             style={styles.input}
                         />
                     </div>
-                    <button type="submit" style={styles.button}>Sign Up</button>
+                    <button type="submit" style={styles.button}>Log In</button>
                 </form>
                 <p style={styles.switchText}>
-                    Already have an account?{" "}
-                    <link to = "/login">Login</link>
+                    Don't have an account?{" "}
+                    <link to = "/register">Register</link>
                 </p>
             </div>
         </div>
@@ -129,4 +118,4 @@ const styles = {
     },
 };
 
-export default Signup;
+export default Login;
