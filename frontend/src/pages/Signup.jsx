@@ -1,20 +1,21 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 const Signup = () => {
-    const [name, setName] = useState('')
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
 
     const handdleSubmit = async (e) => {
-        e.preventDefault()
+        e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:5000/api/auth/register', { name, email, password })
-            console.log(response)
+            const response = await axios.post('http://localhost:5000/api/auth/register', { name, email, password });
+            console.log(response);
         } catch (error) {
-            console.log(error)
+            console.log(error);
         }
-    }
+    };
 
     return (
         <div style={styles.container}>
@@ -58,7 +59,7 @@ const Signup = () => {
                 </form>
                 <p style={styles.switchText}>
                     Already have an account?{" "}
-                    <link to = "/login">Login</link>
+                    <Link to="/login" style={styles.link}>Login</Link>
                 </p>
             </div>
         </div>

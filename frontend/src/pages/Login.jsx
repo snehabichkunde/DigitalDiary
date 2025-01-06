@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -10,7 +11,7 @@ const Login = () => {
         try {
             const response = await axios.post('http://localhost:5000/api/auth/login', { email, password });
             console.log(response);
-            // You can handle successful login here, like redirecting or storing a token
+            // Handle successful login here
         } catch (error) {
             console.log(error);
         }
@@ -47,7 +48,7 @@ const Login = () => {
                 </form>
                 <p style={styles.switchText}>
                     Don't have an account?{" "}
-                    <link to = "/register">Register</link>
+                    <Link to="/register" style={styles.link}>Register</Link>
                 </p>
             </div>
         </div>
