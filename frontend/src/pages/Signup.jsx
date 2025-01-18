@@ -1,29 +1,42 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const navigate = useNavigate();
 
-    const handdleSubmit = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             const response = await axios.post('http://localhost:5000/api/auth/register', { name, email, password });
-            console.log(response);
+            console.log(response.data); // Log the response to see the structure
+            if (response.data.message === 'Account created successfully') {
+                navigate('/');
+            }else if (response.data.message === 'Email already exists') {
+                // Handle the case where the email already exists
+                alert('Account with this email already exists. Please log in.');
+                navigate('/login'); // Redirect to the login page
+            }
+            else {
+                console.log('Registration failed or unexpected message.');
+            }
         } catch (error) {
             console.log(error);
         }
     };
+    
 
     return (
         <div style={styles.container}>
             <div style={styles.card}>
                 <h2 style={styles.heading}>Create an Account</h2>
-                <form style={styles.form} onSubmit={handdleSubmit}>
+                <form style={styles.form} onSubmit={handleSubmit}>
                     <div style={styles.inputGroup}>
-                        <label htmlFor="name" style={styles.label}>Name</label>
+                        <label htmlFor="name" style={styles.label}>Full Name</label>
                         <input
                             type="text"
                             onChange={(e) => setName(e.target.value)}
@@ -50,7 +63,7 @@ const Signup = () => {
                             type="password"
                             onChange={(e) => setPassword(e.target.value)}
                             id="password"
-                            placeholder="*****"
+                            placeholder="Enter Password"
                             required
                             style={styles.input}
                         />
@@ -59,7 +72,7 @@ const Signup = () => {
                 </form>
                 <p style={styles.switchText}>
                     Already have an account?{" "}
-                    <Link to="/login" style={styles.link}>Login</Link>
+                    <Link to="/" style={styles.link}>Login</Link>
                 </p>
             </div>
         </div>
@@ -72,61 +85,89 @@ const styles = {
         justifyContent: "center",
         alignItems: "center",
         height: "100vh",
-        backgroundColor: "#f5f5f5",
-        fontFamily: "'Arial', sans-serif",
+        background: "linear-gradient(135deg, #ff7e5f, #feb47b)", // Soft gradient background
+        fontFamily: "'Roboto', sans-serif",
+        padding: "0 20px", // Added padding for small screens
+        boxSizing: "border-box",
     },
     card: {
-        backgroundColor: "#fff",
+        backgroundColor: "#ffffff",
         padding: "2rem",
-        borderRadius: "8px",
-        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+        borderRadius: "12px",
+        boxShadow: "0 10px 20px rgba(0, 0, 0, 0.1)",
         width: "100%",
-        maxWidth: "400px",
+        maxWidth: "450px", // Ensuring max width
+        textAlign: "center",
     },
     heading: {
-        textAlign: "center",
-        marginBottom: "1.5rem",
+        fontSize: "24px",
+        fontWeight: "bold",
         color: "#333",
+        marginBottom: "1.5rem",
     },
     form: {
         display: "flex",
         flexDirection: "column",
     },
     inputGroup: {
-        marginBottom: "1rem",
+        marginBottom: "1.2rem",
     },
     label: {
         marginBottom: "0.5rem",
-        display: "block",
-        color: "#555",
-        fontWeight: "bold",
+        fontSize: "14px",
+        color: "#333",
+        fontWeight: "500",
     },
     input: {
         width: "100%",
         padding: "0.8rem",
-        borderRadius: "4px",
+        borderRadius: "8px",
         border: "1px solid #ddd",
-        fontSize: "1rem",
+        fontSize: "14px",
+        transition: "all 0.3s ease-in-out",
     },
     button: {
         padding: "0.8rem",
-        backgroundColor: "#007BFF",
+        backgroundColor: "#ff7e5f",
         color: "#fff",
         border: "none",
-        borderRadius: "4px",
+        borderRadius: "8px",
+        fontSize: "16px",
+        fontWeight: "600",
         cursor: "pointer",
-        fontSize: "1rem",
-        fontWeight: "bold",
+        transition: "all 0.3s ease",
     },
     switchText: {
         marginTop: "1rem",
-        textAlign: "center",
+        fontSize: "14px",
         color: "#555",
     },
     link: {
-        color: "#007BFF",
+        color: "#ff7e5f",
         textDecoration: "none",
         fontWeight: "bold",
+    },
+
+    // Media Queries for Responsiveness
+    '@media (max-width: 768px)': {
+        container: {
+            padding: "0 10px", // Padding for mobile screens
+        },
+        card: {
+            padding: "1.5rem", // Adjust padding for mobile screens
+        },
+        heading: {
+            fontSize: "20px", // Smaller heading font on mobile
+        },
+        input: {
+            fontSize: "12px", // Smaller font for inputs on mobile
+        },
+        button: {
+            padding: "0.7rem", // Smaller button on mobile
+        },
+        switchText: {
+            fontSize: "12px", // Smaller text for switch
+        },
     },
 };
 
