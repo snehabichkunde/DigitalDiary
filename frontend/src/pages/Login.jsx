@@ -1,12 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
+import { useAuth } from "../context/ContextProvider";  // Updated import
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const { user, login } = useAuth();  // Added user and login from context
+
+  useEffect(() => {
+    if (user) {
+      // Redirect to /home if the user is logged in
+      navigate("/home");
+    }
+  }, [user, navigate]);  // Will trigger when user state changes
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,8 +26,9 @@ function Login() {
       });
 
       if (response.data.message === "Login successful") {
+        login(response.data.user);  // Login and update context
         console.log("login successfully");
-        navigate("/home");
+        // No need to navigate here, it will be handled by useEffect
       } else {
         console.log("Login failed:", response.data.message);
       }
