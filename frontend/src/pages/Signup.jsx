@@ -11,23 +11,33 @@ const Signup = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+    
+        // Check if all fields are filled
+        if (!name || !email || !password) {
+            alert("All fields are required!");
+            return;
+        }
+    
         try {
             const response = await axios.post('http://localhost:5000/api/auth/register', { name, email, password });
             console.log(response.data); // Log the response to see the structure
-            if (response.data.message === 'Account created successfully') {
+    
+            if (response.data.success) {
+                alert(response.data.message); // 'Account created successfully'
                 navigate('/');
-            }else if (response.data.message === 'Email already exists') {
-                // Handle the case where the email already exists
-                alert('Account with this email already exists. Please log in.');
-                navigate('/login'); // Redirect to the login page
-            }
-            else {
-                console.log('Registration failed or unexpected message.');
+            } else {
+                alert(response.data.message); // 'Email already exists' or any other backend error
+                if (response.data.message === 'Email already exists') {
+                    navigate('/login'); // Redirect to login
+                }
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
+            alert('An error occurred during registration. Please try again.');
         }
     };
+    
+    
     
 
     return (

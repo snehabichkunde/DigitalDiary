@@ -1,13 +1,14 @@
-import React from 'react';
-import { Routes, Route, BrowserRouter as Router } from 'react-router-dom';
-import { useAuth } from './context/ContextProvider';
-import PrivateRoute from './components/PrivateRoute';
-import Login from './pages/Login';
-import Home from './pages/Home';
-import Register from './pages/Signup';
+import React from "react";
+import { Routes, Route, BrowserRouter as Router } from "react-router-dom";
+import { useAuth } from "./context/ContextProvider";
+import PrivateRoute from "./components/PrivateRoute";
+import Login from "./pages/Login";
+import Home from "./pages/Home";
+import Register from "./pages/Signup";
+import AddStory from "./pages/AddStory"; // Import the AddStory page
 
 const App = () => {
-  const { user } = useAuth();  // Access the user from context
+  const { user } = useAuth(); // Access the user from context
 
   return (
     <Router>
@@ -28,10 +29,20 @@ const App = () => {
           }
         />
 
+        {/* Protected AddStory route */}
+        <Route
+          path="/add"
+          element={
+            <PrivateRoute>
+              <AddStory />
+            </PrivateRoute>
+          }
+        />
+
         {/* Default route: redirect to home if the user is logged in, otherwise go to login */}
         <Route
           path="/"
-          element={user ? <Home /> : <Login />}  // If user is logged in, redirect to Home
+          element={user ? <Home /> : <Login />} // If user is logged in, redirect to Home
         />
       </Routes>
     </Router>

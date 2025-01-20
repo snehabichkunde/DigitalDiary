@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext } from "react";
 
 // Create Context
 const AuthContext = createContext();
@@ -8,11 +8,11 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
   const login = (userData) => {
-    setUser(userData);  // Updates the user in the context
+    setUser(userData); // Updates the user in the context
   };
 
   const logout = () => {
-    setUser(null);  // Clears the user from the context
+    setUser(null); // Clears the user from the context
   };
 
   return (
@@ -24,4 +24,3 @@ export const AuthProvider = ({ children }) => {
 
 // Custom hook to use AuthContext
 export const useAuth = () => useContext(AuthContext);
-
