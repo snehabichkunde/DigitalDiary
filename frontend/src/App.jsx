@@ -5,11 +5,10 @@ import PrivateRoute from "./components/PrivateRoute";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Register from "./pages/Signup";
-import AddStory from "./pages/AddStory"; // Import the AddStory page
+import AddStory from "./pages/AddStory"; 
 
 const App = () => {
-  const { user } = useAuth(); // Access the user from context
-
+  const { user } = useAuth(); 
   return (
     <Router>
       <Routes>
@@ -29,7 +28,6 @@ const App = () => {
           }
         />
 
-        {/* Protected AddStory route */}
         <Route
           path="/add"
           element={
@@ -39,7 +37,6 @@ const App = () => {
           }
         />
 
-        {/* Default route: redirect to home if the user is logged in, otherwise go to login */}
         <Route
           path="/"
           element={user ? <Home /> : <Login />} // If user is logged in, redirect to Home

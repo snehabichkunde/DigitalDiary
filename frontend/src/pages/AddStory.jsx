@@ -5,39 +5,44 @@ const AddStory = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
-  const handleSubmit = async (e) => {
+  const handleAddStory = async (e) => {
     e.preventDefault();
-    const data = { title, content }; 
-
-    const myToken = localStorage.getItem('token'); 
-    console.log("Token being sent:", myToken);
-
-    console.log("Token: ", myToken); 
+    
+    const token = localStorage.getItem("token");
+    
+    if (!token) {
+      console.error("No token found. Please log in.");
+      return;
+    }
+  
+    const storyData = {
+      title, 
+      content
+    };
+  
     try {
-      const response = await axios.post('http://localhost:5000/api/story/add', data, {
-        headers: {
-          'Authorization': `Bearer ${myToken}`,
-        },
-      });
-
-      console.log(response.data); 
-      if (response.data.message === "Story added successfully") {
-        alert("Your story has been submitted!");
-        setTitle("");
-        setContent("");
-      } else {
-        console.log("Unexpected message:", response.data.message);
-      }
+      console.log("Starting to add story...");
+  
+      const response = await axios.post(
+        "http://localhost:5000/api/story/add",
+        storyData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      console.log("Story added successfully:", response.data);
     } catch (error) {
-      console.error("Error submitting story:", error);
-      alert("There was an error submitting your story. Please try again later.");
+      console.error("Error adding story:", error.response?.data || error.message);
     }
   };
 
   return (
     <div style={{ maxWidth: "600px", margin: "50px auto" }}>
       <h2>Add Your Story</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleAddStory}>
         <input
           type="text"
           placeholder="Enter story title"

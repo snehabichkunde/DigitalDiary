@@ -15,7 +15,7 @@ router.post("/add", verifyToken, async (req, res) => {
     const newStory = new Story({
       title,
       content,
-      userId: req.user.id, // From the verified token
+      userId: req.user.id, 
     });
 
     await newStory.save();
@@ -24,16 +24,6 @@ router.post("/add", verifyToken, async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Error adding story" });
-  }
-});
-
-router.get("/", verifyToken, async (req, res) => {
-  try {
-    const stories = await Story.find({ userId: req.user.id }); // Fetch stories by user ID
-    return res.status(200).json({ stories });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Error fetching stories" });
   }
 });
 

@@ -12,7 +12,6 @@ function Login() {
 
   useEffect(() => {
     if (user) {
-      // Redirect to /home if the user is logged in
       navigate("/home");
     }
   }, [user, navigate]);
@@ -24,10 +23,15 @@ function Login() {
         email,
         password,
       });
-
+  
       if (response.data.message === "Login successful") {
-        login(response.data.user); // Pass the user data to the context
-        console.log("Login successful");
+        const token = response.data.token;
+        if (token) {
+          localStorage.setItem("token", token);
+          console.log("Token saved successfully:", token);
+          
+          login(response.data.user);
+        }
       } else {
         console.log("Login failed:", response.data.message);
       }
@@ -35,6 +39,8 @@ function Login() {
       console.error("Error logging in:", error);
     }
   };
+  
+  
 
   return (
     <div className="login-page">
