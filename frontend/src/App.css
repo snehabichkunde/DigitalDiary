@@ -1,0 +1,107 @@
+/* Root Variables for Theming */
+:root {
+    --light-background: #fafafa;
+    --light-header: #ffffff;
+    --light-text: #262626;
+    --light-border: #dbdbdb;
+    --light-accent: #0095f6; /* Light mode blue */
+  
+    --dark-background: #121212;
+    --dark-header: #000000;
+    --dark-text: #ffffff;
+    --dark-border: #3a3a3a;
+    --dark-accent: #0095f6; /* Same blue for dark mode */
+  
+    --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --transition-speed: 0.3s;
+}
+  
+/* Global Reset */
+body {
+    margin: 0;
+    font-family: var(--font-family);
+    line-height: 1.6;
+    background-color: var(--light-background); /* Default light mode */
+    color: var(--light-text); /* Default light text */
+    transition: background-color var(--transition-speed), color var(--transition-speed);
+}
+  
+body.dark-mode {
+    background-color: var(--dark-background);
+    color: var(--dark-text);
+}
+  
+/* General Styles */
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+  
+/* Header Styles */
+.header {
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background-color: var(--light-header); /* Default light mode */
+    border-bottom: 1px solid var(--light-border);
+    transition: background-color var(--transition-speed), border-color var(--transition-speed);
+}
+  
+body.dark-mode .header {
+    background-color: var(--dark-header);
+    border-color: var(--dark-border);
+}
+  
+/* Theme Toggle Button */
+.theme-toggle-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: bold;
+    background: var(--light-accent);
+    color: #ffffff;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s, background var(--transition-speed), color var(--transition-speed);
+}
+
+body.dark-mode .theme-toggle-btn {
+    background: var(--dark-accent);
+    color: #ffffff;
+    box-shadow: 0px 3px 5px rgba(255, 255, 255, 0.2);
+}
+
+.theme-toggle-btn:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+  
+/* Link Styles */
+a {
+    color: var(--light-accent);
+    text-decoration: none;
+    transition: color var(--transition-speed);
+}
+
+body.dark-mode a {
+    color: var(--dark-accent);
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Body Content Styles */
+body.dark-mode * {
+    background-color: var(--dark-background) !important; /* Override background colors for dark mode */
+    color: var(--dark-text) !important; /* Override text color for dark mode */
+}
+
+* {
+    transition: background-color var(--transition-speed), color var(--transition-speed), box-shadow var(--transition-speed);
+}
