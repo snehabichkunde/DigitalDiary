@@ -27,4 +27,14 @@ router.post("/add", verifyToken, async (req, res) => {
   }
 });
 
+router.get("/all", verifyToken, async (req, res) => {
+  try {
+    const stories = await Story.find({ userId: req.user.id }); // Fetch stories specific to the user
+    return res.status(200).json(stories);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Error fetching stories" });
+  }
+});
+
 export default router;
