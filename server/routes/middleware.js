@@ -1,5 +1,6 @@
 // middleware.js
 import jwt from "jsonwebtoken";
+const jwtSecret = "sneha's_dairy.jwtsecrt"; 
 
 export const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -13,7 +14,7 @@ export const verifyToken = (req, res, next) => {
   console.log("Token in middleware:", token); 
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, jwtSecret);
     req.user = decoded; 
     next();
   } catch (error) {
