@@ -11,10 +11,10 @@ const NavBar = ({ onLogout }) => {
       justifyContent: "space-between",
       alignItems: "center",
       padding: "10px 30px",
-      background: "#ffffff", // Clean white background
-      color: "#333", // Neutral dark text color
-      borderBottom: "2px solid #f0f0f0", // Subtle border for separation
-      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)", // Minimal shadow for depth
+      background: "transparent", // Make the navbar background transparent
+      color: "#fff", // White text color to contrast with the background image
+      borderBottom: "none", // Remove the bottom border if you want it to blend completely
+      boxShadow: "none", // Remove shadow to make it look flat and seamless
     },
     leftSection: {
       display: "flex",
@@ -26,7 +26,7 @@ const NavBar = ({ onLogout }) => {
       fontWeight: "500",
       margin: "0",
       fontStyle: "italic", // Adds elegance
-      color: "#555", // Softer text for the quote
+      color: "#fff", // Use white for quote text to contrast with the background
     },
     button: {
       padding: "8px 16px",

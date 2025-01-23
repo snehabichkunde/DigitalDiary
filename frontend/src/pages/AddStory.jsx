@@ -1,11 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const AddStory = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [currentDate, setCurrentDate] = useState("");
+  const [showAlert, setShowAlert] = useState(false); // State for showing the alert
   const navigate = useNavigate();
+  const storyRef = useRef(null); // Reference to the story textarea
+
+  useEffect(() => {
+    const date = new Date();
+    setCurrentDate(date.toLocaleDateString());
+  }, []);
 
   const handleAddStory = async (e) => {
     e.preventDefault();
@@ -23,8 +31,6 @@ const AddStory = () => {
     };
 
     try {
-      console.log("Starting to add story...");
-
       const response = await axios.post(
         "http://localhost:5000/api/story/add",
         storyData,
@@ -42,111 +48,220 @@ const AddStory = () => {
     }
   };
 
+  const handleTitleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      storyRef.current.focus();
+    }
+  };
+
+  const handleBackClick = () => {
+    setShowAlert(true);
+  };
+
+  const confirmBack = () => {
+    setShowAlert(false);
+    navigate("/home"); // Navigate back to the home page
+  };
+
+  const cancelBack = () => {
+    setShowAlert(false);
+  };
+
   return (
     <div
       style={{
         display: "flex",
         flexDirection: "column",
-        minHeight: "100vh", // Full height
-        backgroundImage:
-          "linear-gradient(white 50px, transparent 0), linear-gradient(to right, white 50px, transparent 0)",
-        backgroundSize: "100% 60px, 60px 100%",
+        minHeight: "100vh",
         backgroundColor: "#fdf4dc",
-        fontFamily: "Georgia, 'Times New Roman', serif", // Elegant font
+        fontFamily: "Georgia, 'Times New Roman', serif",
+        padding: "20px",
+        position: "relative",
+        backgroundImage: `url('/rose.webp')`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
       }}
     >
-      {/* Navigation Bar */}
+      {/* Date Section */}
       <div
         style={{
-          background: "#6d4c41",
-          color: "white",
-          padding: "20px",
-          textAlign: "center",
-          fontSize: "1.8rem",
-          borderBottom: "3px solid #d6b18b",
+          position: "absolute",
+          top: "20px",
+          right: "20px",
+          fontSize: "1rem",
+          fontFamily: "Georgia, 'Times New Roman', serif",
+          color: "#001a33",
+          textShadow: "2px 2px 8px rgba(0, 0, 0, 0.5)",
         }}
       >
-        Add Your Story
+        {currentDate}
       </div>
 
-      {/* Form Container */}
+      {/* Title Section */}
       <div
         style={{
           display: "flex",
-          justifyContent: "center",
+          flexDirection: "row",
           alignItems: "center",
-          flex: 1,
-          padding: "40px 20px",
+          marginBottom: "10px",
         }}
       >
-        <form
-          onSubmit={handleAddStory}
+        <label
           style={{
-            width: "100%",
-            maxWidth: "900px", // Max width for better responsiveness
-            backgroundColor: "#ffffff",
-            padding: "30px",
-            borderRadius: "10px",
-            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
-            display: "flex",
-            flexDirection: "column",
+            fontSize: "1.2rem",
+            fontWeight: "bold",
+            color: "#001a33",
+            textShadow: "2px 2px 8px rgba(0, 0, 0, 0.5)",
+            marginRight: "10px",
           }}
         >
-          <input
-            type="text"
-            placeholder="Enter story title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-            style={{
-              width: "100%",
-              padding: "12px",
-              fontSize: "1.4rem",
-              border: "1px solid #c5a880",
-              borderRadius: "5px",
-              marginBottom: "20px",
-              background: "rgba(255, 255, 255, 0.9)",
-              fontFamily: "Georgia, 'Times New Roman', serif", // Elegant font
-              color: "#6d4c41",
-            }}
-          />
-          <textarea
-            placeholder="Write your story here..."
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            required
-            style={{
-              width: "100%",
-              padding: "12px",
-              fontSize: "1.2rem",
-              border: "1px solid #c5a880",
-              borderRadius: "5px",
-              minHeight: "300px", // Increased height here
-              background: "rgba(255, 255, 255, 0.9)",
-              fontFamily: "Georgia, 'Times New Roman', serif", // Elegant font
-              color: "#6d4c41",
-              marginBottom: "20px",
-            }}
-          />
+          Title:
+        </label>
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          onKeyDown={handleTitleKeyDown}
+          placeholder="Write your title here..."
+          style={{
+            flex: 1,
+            border: "none",
+            outline: "none",
+            fontSize: "1.2rem",
+            fontFamily: "Georgia, 'Times New Roman', serif",
+            background: "transparent",
+            color: "#001a33",
+            lineHeight: "24px",
+            padding: "10px",
+            marginBottom: "10px",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            textShadow: "2px 2px 8px rgba(0, 0, 0, 0.5)",
+          }}
+        />
+      </div>
+
+      {/* Story Section */}
+      <form
+        onSubmit={handleAddStory}
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <textarea
+          ref={storyRef}
+          placeholder="Write your story here..."
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          style={{
+            flex: 1,
+            border: "none",
+            outline: "none",
+            fontSize: "1.2rem",
+            fontFamily: "Georgia, 'Times New Roman', serif",
+            background: "transparent",
+            color: "#001a33",
+            resize: "none",
+            lineHeight: "24px",
+            padding: "10px",
+            marginTop: "10px",
+            textShadow: "2px 2px 8px rgba(0, 0, 0, 0.5)",
+          }}
+        />
+        <button
+          type="submit"
+          style={{
+            backgroundColor: "#001a33",
+            color: "white",
+            padding: "8px 16px",
+            fontSize: "1rem",
+            fontWeight: "bold",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+            alignSelf: "flex-start",
+            fontFamily: "Georgia, 'Times New Roman', serif",
+            marginTop: "20px",
+          }}
+        >
+          Submit Story
+        </button>
+      </form>
+
+      {/* Back Button */}
+      <button
+        onClick={handleBackClick}
+        style={{
+          position: "absolute",
+          bottom: "20px",
+          right: "20px",
+          backgroundColor: "#001a33",
+          color: "white",
+          padding: "8px 16px",
+          fontSize: "1rem",
+          fontWeight: "bold",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+          fontFamily: "Georgia, 'Times New Roman', serif",
+        }}
+      >
+        Back
+      </button>
+
+      {/* Alert Dialog */}
+      {showAlert && (
+        <div
+          style={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            backgroundColor: "white",
+            padding: "20px",
+            borderRadius: "8px",
+            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+            zIndex: 1000,
+            textAlign: "center",
+          }}
+        >
+          <p style={{ fontSize: "1.2rem", marginBottom: "20px" }}>
+            Your story won't be saved. Are you sure you want to go back?
+          </p>
           <button
-            type="submit"
+            onClick={confirmBack}
             style={{
-              width: "100%",
-              padding: "12px",
-              fontSize: "1.2rem",
-              fontWeight: "bold",
-              background: "#6d4c41",
+              backgroundColor: "#001a33",
               color: "white",
+              padding: "8px 16px",
+              fontSize: "1rem",
               border: "none",
               borderRadius: "5px",
               cursor: "pointer",
-              fontFamily: "Georgia, 'Times New Roman', serif", // Elegant font
+              marginRight: "10px",
             }}
           >
-            Submit Story
+            OK
           </button>
-        </form>
-      </div>
+          <button
+            onClick={cancelBack}
+            style={{
+              backgroundColor: "#001a33",
+              color: "white",
+              padding: "8px 16px",
+              fontSize: "1rem",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+            }}
+          >
+            Cancel
+          </button>
+        </div>
+      )}
     </div>
   );
 };

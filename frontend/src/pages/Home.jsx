@@ -50,89 +50,148 @@ const Home = () => {
         display: "flex",
         flexDirection: "column",
         minHeight: "100vh", // Ensure it takes full height
-        backgroundImage:
-          "linear-gradient(white 50px, transparent 0), linear-gradient(to right, white 50px, transparent 0)",
-        backgroundSize: "100% 60px, 60px 100%",
-        backgroundColor: "#fdf4dc",
-        padding: "20px",
+        backgroundImage: `url('/index_page.jpeg')`, // Background image
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        padding: "0px", // Set padding to 0 to remove extra space
         fontFamily: "Georgia, 'Times New Roman', serif", // Consistent elegant font
+        color: "#001a33", // Dark blue color
       }}
     >
       <NavBar />
       
       <div
         style={{
-          flex: 1,
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "flex-start",
-          width: "100%", // Ensures the container takes full width
+          alignItems: "center", // Center the content
+          justifyContent: "center", // Center the content vertically
+          flex: 1,
+          width: "100%",
+          paddingTop: "0px", // Remove extra padding at the top
         }}
       >
-        {/* Search Bar */}
+        {/* Search Bar as a simple search icon */}
+        <div
+          style={{
+            position: "absolute",
+            top: "15px", // Reduce distance from the top
+            right: "15px", // Adjust search icon position
+            fontSize: "2rem",
+            cursor: "pointer",
+            color: "#001a33",
+          }}
+        >
+          <i className="fas fa-search" style={{ color: "#001a33" }} />
+        </div>
+
+        {/* Search Input */}
         <input
           type="text"
-          placeholder="Search by title..."
+          placeholder="Search for the story"
           value={searchQuery}
           onChange={handleSearch}
           style={{
-            width: "100%", // Make search bar span the entire width
+            width: "90%", // Make search bar span the entire width
             maxWidth: "1000px", // Add a max-width if you want to limit the width
-            padding: "12px",
+            padding: "8px",
             fontSize: "1.2rem",
-            border: "1px solid #c5a880",
-            borderRadius: "5px",
-            marginBottom: "20px",
             fontFamily: "Georgia, 'Times New Roman', serif", // Consistent elegant font
-            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            backgroundColor: "transparent", // Transparent background
+            border: "none", // Remove the border
             color: "#6d4c41",
             textAlign: "center",
+            outline: "none", // Remove outline on focus
+            boxShadow: "none", // No box-shadow
+            marginBottom: "10px", // Reduced margin between search and title
           }}
         />
         
-        {/* Story List */}
-        <div
-          style={{
-            width: "100%", // Full width container
-            maxWidth: "1000px", // Add max-width to contain content
-            backgroundColor: "#ffffff",
-            padding: "20px",
-            borderRadius: "10px",
-            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
-            fontFamily: "Georgia, 'Times New Roman', serif", // Consistent elegant font
-            color: "#6d4c41",
-          }}
-        >
-          <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
-            Your Diary Index
-          </h2>
-          {filteredStories.length === 0 ? (
-            <p style={{ textAlign: "center" }}>No matching entries found.</p>
-          ) : (
-            <ul style={{ listStyleType: "none", padding: 0 }}>
-              {filteredStories.map((story) => (
-                <li
-                  key={story._id}
-                  style={{
-                    padding: "12px",
-                    margin: "10px 0",
-                    border: "1px solid #c5a880",
-                    borderRadius: "5px",
-                    backgroundColor: "rgba(255, 255, 255, 0.9)",
-                    fontSize: "1.2rem",
-                    color: "#6d4c41",
-                    cursor: "pointer",
-                    transition: "transform 0.2s ease",
-                  }}
-                  onClick={() => alert(`Story ID: ${story._id}`)} // Replace with actual navigation
-                >
-                  {story.title}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        {/* Conditionally render story list based on search query */}
+        {searchQuery === "" && (
+          <div
+            style={{
+              width: "90%", // Full width container with padding
+              marginTop: "5px", // Reduced margin to tighten the layout
+              fontFamily: "Georgia, 'Times New Roman', serif", // Consistent elegant font
+              color: "#001a33", // Dark blue text color
+              textAlign: "center", // Center the text horizontally
+            }}
+          >
+            <h2
+              style={{
+                fontWeight: "bold", // Make the text bold
+                fontSize: "2.5rem", // Make the text larger
+                marginTop: "0px", // Remove space above the title
+                marginBottom: "10px", // Reduced space below title
+              }}
+            >
+              Your Diary Index
+            </h2>
+            {filteredStories.length === 0 ? (
+              <p style={{ textAlign: "center" }}>No matching entries found.</p>
+            ) : (
+              <ul style={{ listStyleType: "none", padding: 0 }}>
+  {filteredStories.map((story) => (
+    <li
+      key={story._id}
+      style={{
+        padding: "5px", // Slight padding
+        margin: "3px 0", // Reduced margin between list items
+        fontSize: "1.2rem",
+        color: "#001a33", // Dark blue color
+        cursor: "pointer",
+        transition: "transform 0.2s ease",
+        textDecoration: "underline",
+      }}
+      onClick={() => alert(`Story ID: ${story._id}`)} // Replace with actual navigation
+    >
+      {/* Displaying date and title */}
+      {new Date(story.createdAt).toLocaleDateString("en-US")} : {story.title}
+    </li>
+  ))}
+</ul>
+
+            )}
+          </div>
+        )}
+
+        {/* When there's a search query, show the filtered results */}
+        {searchQuery !== "" && (
+          <div
+            style={{
+              width: "90%", // Full width container with padding
+              marginTop: "5px", // Reduced margin to tighten the layout
+              fontFamily: "Georgia, 'Times New Roman', serif", // Consistent elegant font
+              color: "#001a33", // Dark blue text color
+              textAlign: "center", // Center the text horizontally
+            }}
+          >
+            {filteredStories.length === 0 ? (
+              <p>No matching entries found.</p>
+            ) : (
+              <ul style={{ listStyleType: "none", padding: 0 }}>
+                {filteredStories.map((story) => (
+                  <li
+                    key={story._id}
+                    style={{
+                      padding: "5px", // Slight padding
+                      margin: "3px 0", // Reduced margin between list items
+                      fontSize: "1.2rem",
+                      color: "#001a33", // Dark blue color
+                      cursor: "pointer",
+                      transition: "transform 0.2s ease",
+                      textDecoration: "underline",
+                    }}
+                    onClick={() => alert(`Story ID: ${story._id}`)} // Replace with actual navigation
+                  >
+                    {story.title}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
