@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+// Define Story schema
 const storySchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
@@ -7,9 +8,10 @@ const storySchema = new mongoose.Schema(
     userId: { type: String, required: true },
   },
   {
-    timestamps: true, // This will automatically add createdAt and updatedAt fields
+    timestamps: true, // Adds createdAt and updatedAt fields
   }
 );
 
+// Create a Story model using the schema
 const Story = mongoose.model("Story", storySchema);
 export default Story;

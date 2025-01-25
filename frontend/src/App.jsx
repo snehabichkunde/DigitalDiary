@@ -6,13 +6,14 @@ import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Register from "./pages/Signup";
 import AddStory from "./pages/AddStory";
+import StoryDetails from "./pages/StoryDetail";
 import "./App.css";
 
 const App = () => {
-  const { user } = useAuth();
+  const { user } = useAuth(); // Retrieve user context for authentication
 
   return (
-    <div>
+    <div className="app-wrapper">
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
@@ -34,8 +35,16 @@ const App = () => {
             }
           />
           <Route
+            path="/story/:id"
+            element={
+              <PrivateRoute>
+                <StoryDetails />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/"
-            element={user ? <Home /> : <Login />} // Default route
+            element={user ? <Home /> : <Login />} // Redirect to Home if logged in, Login otherwise
           />
         </Routes>
       </Router>
