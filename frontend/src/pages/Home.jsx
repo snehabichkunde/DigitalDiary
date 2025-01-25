@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";  // Import useNavigate
 import axios from "axios";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import NavBar from "../components/NavBar";
 
 const Home = () => {
   const [stories, setStories] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredStories, setFilteredStories] = useState([]);
-  const navigate = useNavigate();  // Initialize useNavigate
+  const [sortOrder, setSortOrder] = useState("");
+  const [dateFilterVisible, setDateFilterVisible] = useState(false);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const navigate = useNavigate(); // Initialize navigate
 
   useEffect(() => {
     const fetchStories = async () => {
@@ -39,15 +43,55 @@ const Home = () => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
 
-    // Filter stories based on the search query
     const filtered = stories.filter((story) =>
       story.title.toLowerCase().includes(query)
     );
     setFilteredStories(filtered);
   };
 
-  const handleStoryClick = (id) => {
-    navigate(`/story/${id}`);  // Navigate to story details page with the story ID
+  const handleSortChange = (sortOption) => {
+    setSortOrder(sortOption);
+
+    const sortedStories = [...filteredStories].sort((a, b) => {
+      if (sortOption === "latest") {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      } else if (sortOption === "oldest") {
+        return new Date(a.createdAt) - new Date(b.createdAt);
+      }
+      return 0;
+    });
+
+    setFilteredStories(sortedStories);
+  };
+
+  const handleDateSelect = (date) => {
+    if (!startDate) {
+      setStartDate(date);
+    } else if (!endDate && new Date(date) >= new Date(startDate)) {
+      setEndDate(date);
+      setDateFilterVisible(false); // Hide the calendar after both dates are selected
+      applyDateFilter(startDate, date); // Apply the date filter
+    }
+  };
+
+  const applyDateFilter = (start, end) => {
+    if (start && end) {
+      const filteredByDate = stories.filter((story) => {
+        const storyDate = new Date(story.createdAt);
+        const startDateObj = new Date(start);
+        const endDateObj = new Date(end);
+
+        return storyDate >= startDateObj && storyDate <= endDateObj;
+      });
+
+      setFilteredStories(filteredByDate);
+    }
+  };
+
+  const resetDateFilter = () => {
+    setStartDate("");
+    setEndDate("");
+    setFilteredStories(stories); // Reset the filtered stories to show all
   };
 
   return (
@@ -55,97 +99,182 @@ const Home = () => {
       style={{
         display: "flex",
         flexDirection: "column",
-        minHeight: "100vh", // Ensure it takes full height
-        backgroundImage: `url('/index_page.jpeg')`, // Background image
+        backgroundImage: `url('/index_page.jpeg')`,
         backgroundSize: "cover",
         backgroundPosition: "center",
-        padding: "0px", // Set padding to 0 to remove extra space
-        fontFamily: "Georgia, 'Times New Roman', serif", // Consistent elegant font
-        color: "#001a33", // Dark blue color
+        padding: "0px",
+        fontFamily: "Georgia, 'Times New Roman', serif",
+        color: "#001a33",
+        minHeight: "100vh",
       }}
     >
       <NavBar />
-      
+
       <div
         style={{
           display: "flex",
           flexDirection: "column",
-          alignItems: "center", // Center the content
-          justifyContent: "center", // Center the content vertically
+          alignItems: "center",
+          justifyContent: "flex-start", // Align content to the top
           flex: 1,
           width: "100%",
-          paddingTop: "0px", // Remove extra padding at the top
+          paddingTop: "30px", // Add space above the content
+          paddingBottom: "20px",
         }}
       >
-        {/* Search Input */}
-        <input
-          type="text"
-          placeholder="Search for the story"
-          value={searchQuery}
-          onChange={handleSearch}
+        <h2
           style={{
-            width: "90%", // Make search bar span the entire width
-            maxWidth: "1000px", // Add a max-width if you want to limit the width
-            padding: "8px",
-            fontSize: "1.2rem",
-            fontFamily: "Georgia, 'Times New Roman', serif", // Consistent elegant font
-            backgroundColor: "transparent", // Transparent background
-            border: "none", // Remove the border
-            color: "#6d4c41",
-            textAlign: "center",
-            outline: "none", // Remove outline on focus
-            boxShadow: "none", // No box-shadow
-            marginBottom: "10px", // Reduced margin between search and title
-          }}
-        />
-
-        {/* Conditionally render story list based on search query */}
-        <div
-          style={{
-            width: "90%", // Full width container with padding
-            marginTop: "5px", // Reduced margin to tighten the layout
-            fontFamily: "Georgia, 'Times New Roman', serif", // Consistent elegant font
-            color: "#001a33", // Dark blue text color
-            textAlign: "center", // Center the text horizontally
+            fontSize: "2rem",
+            fontFamily: "Georgia, 'Times New Roman', serif",
+            color: "#001a33",
+            marginBottom: "20px",
           }}
         >
-          <h2
+          Your Index
+        </h2>
+        {/* Search, Sort, and Date Filters */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "90%",
+            maxWidth: "1000px",
+            marginBottom: "20px",
+          }}
+        >
+          {/* Search Input */}
+          <input
+            type="text"
+            placeholder="Search for the story"
+            value={searchQuery}
+            onChange={handleSearch}
             style={{
-              fontWeight: "bold", // Make the text bold
-              fontSize: "2.5rem", // Make the text larger
-              marginTop: "0px", // Remove space above the title
-              marginBottom: "10px", // Reduced space below title
+              flex: 1,
+              padding: "8px",
+              fontSize: "1rem",
+              fontFamily: "Georgia, 'Times New Roman', serif",
+              backgroundColor: "transparent",
+              border: "1px solid #001a33",
+              color: "#001a33",
+              outline: "none",
+              marginRight: "10px",
+            }}
+          />
+
+          {/* Sort Dropdown */}
+          <select
+            value={sortOrder}
+            onChange={(e) => handleSortChange(e.target.value)}
+            style={{
+              padding: "8px",
+              fontSize: "1rem",
+              fontFamily: "Georgia, 'Times New Roman', serif",
+              border: "1px solid #001a33",
+              color: "#001a33",
+              backgroundColor: "transparent",
+              cursor: "pointer",
+              marginRight: "10px",
             }}
           >
-            Your Diary Index
-          </h2>
-          {filteredStories.length === 0 ? (
-            <p>No matching entries found.</p>
-          ) : (
-            <ul style={{ listStyleType: "none", padding: 0 }}>
-              {filteredStories.map((story) => (
-                <li
-                  key={story._id}
+            <option value="latest">Latest to Oldest</option>
+            <option value="oldest">Oldest to Latest</option>
+          </select>
+
+          {/* Date Filter */}
+          <div style={{ position: "relative" }}>
+            <button
+              onClick={() => setDateFilterVisible(!dateFilterVisible)}
+              style={{
+                padding: "8px 12px",
+                fontSize: "1rem",
+                fontFamily: "Georgia, 'Times New Roman', serif",
+                border: "1px solid #001a33",
+                color: "#001a33",
+                backgroundColor: "transparent",
+                cursor: "pointer",
+              }}
+            >
+              {startDate && endDate
+                ? `Start: ${startDate} -> End: ${endDate}`
+                : "Start Date -> End Date"}
+              {startDate && endDate && (
+                <span
+                  onClick={resetDateFilter}
                   style={{
-                    padding: "5px", // Slight padding
-                    margin: "3px 0", // Reduced margin between list items
-                    fontSize: "1.2rem",
-                    color: "#001a33", // Dark blue color
+                    marginLeft: "10px",
+                    color: "#001a33",
                     cursor: "pointer",
-                    transition: "transform 0.2s ease",
-                    textDecoration: "underline",
+                    fontWeight: "bold",
                   }}
-                  onClick={() => handleStoryClick(story._id)} // Use handleStoryClick to navigate
                 >
-                  {new Date(story.createdAt).toLocaleDateString("en-US")} : {story.title}
-                </li>
-              ))}
-            </ul>
-          )}
+                  ×
+                </span>
+              )}
+            </button>
+
+            {/* Date Picker */}
+            {dateFilterVisible && (
+              <input
+                type="date"
+                min={startDate} // Restrict end date to be after start date
+                max={endDate || undefined} // If end date exists, restrict start date to before it
+                onChange={(e) => handleDateSelect(e.target.value)}
+                style={{
+                  position: "absolute",
+                  top: "100%",
+                  left: 0,
+                  padding: "8px",
+                  fontSize: "1rem",
+                  fontFamily: "Georgia, 'Times New Roman', serif",
+                  border: "1px solid #001a33",
+                  color: "#001a33",
+                  backgroundColor: "#fff",
+                  zIndex: 10,
+                }}
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Stories Display */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            justifyContent: "center",
+            width: "90%",
+            maxWidth: "1000px",
+          }}
+        >
+          <StoryList stories={filteredStories} navigate={navigate} />
         </div>
       </div>
     </div>
   );
 };
+
+const StoryList = ({ stories, navigate }) => (
+  <ul style={{ listStyleType: "none", padding: 0 }}>
+    {stories.map((story) => (
+      <li
+        key={story._id}
+        style={{
+          padding: "5px",
+          margin: "3px 0",
+          fontSize: "1.2rem",
+          color: "#001a33",
+          cursor: "pointer",
+          transition: "transform 0.2s ease",
+          textDecoration: "underline",
+        }}
+        onClick={() => navigate(`/story/${story._id}`)} // Navigate to detailed story page
+      >
+        {new Date(story.createdAt).toLocaleDateString("en-US")} : {story.title}
+      </li>
+    ))}
+  </ul>
+);
 
 export default Home;
