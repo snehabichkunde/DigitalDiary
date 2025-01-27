@@ -1,9 +1,11 @@
+// src/pages/Draft.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import NavBar from "../components/NavBar";
+import styles from "../styles";
 
-const Drafts = () => {
+const Draft = () => {
   const [drafts, setDrafts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredDrafts, setFilteredDrafts] = useState([]);
@@ -29,9 +31,9 @@ const Drafts = () => {
           },
         });
 
-        const draftEntries = response.data.filter((story) => story.isDraft === true);
+        const draftStories = response.data.filter((story) => story.isDraft === true);
 
-        const sortedDrafts = draftEntries.sort(
+        const sortedDrafts = draftStories.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
 
@@ -75,8 +77,8 @@ const Drafts = () => {
       setStartDate(date);
     } else if (!endDate && new Date(date) >= new Date(startDate)) {
       setEndDate(date);
-      setDateFilterVisible(false); // Hide the calendar after both dates are selected
-      applyDateFilter(startDate, date); // Apply the date filter
+      setDateFilterVisible(false); 
+      applyDateFilter(startDate, date); 
     }
   };
 
@@ -97,104 +99,31 @@ const Drafts = () => {
   const resetDateFilter = () => {
     setStartDate("");
     setEndDate("");
-    setFilteredDrafts(drafts); // Reset the filtered drafts to show all
+    setFilteredDrafts(drafts); 
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "row", // Keep the navbar and main content side by side
-        minHeight: "100vh", // Full height
-        overflow: "hidden",
-      }}
-    >
-      <div
-        style={{
-          width: "250px", // Sidebar width
-          flexShrink: 0, // Prevent shrinking
-        }}
-      >
+    <div style={{ ...styles.container, backgroundColor: "#ffffff", minHeight: "100vh" }}> {/* Match AddStory background */}
+      <div style={styles.sidebar}>
         <NavBar />
       </div>
 
-      <div
-        style={{
-          flex: 1, // Take up remaining space
-          display: "flex",
-          flexDirection: "column",
-          backgroundImage: "url('/index_page.jpeg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          padding: "0px",
-          fontFamily: "Georgia, 'Times New Roman', serif",
-          color: "#001a33",
-          overflowY: "auto", // Allow scrolling if content exceeds the screen height
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "flex-start",
-            flex: 1,
-            width: "100%",
-            paddingTop: "30px",
-            paddingBottom: "20px",
-          }}
-        >
-          <h2
-            style={{
-              fontSize: "2rem",
-              fontFamily: "Georgia, 'Times New Roman', serif",
-              color: "#001a33",
-              marginBottom: "20px",
-            }}
-          >
-            Your Drafts
-          </h2>
+      <div style={styles.content}>
+        <div style={styles.header}>
+          <h2 style={styles.h2}>Your Drafts</h2>
 
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "90%",
-              maxWidth: "1000px",
-              marginBottom: "20px",
-            }}
-          >
+          <div style={styles.inputWrapper}>
             <input
               type="text"
-              placeholder="Search for drafts"
+              placeholder="Search for the draft"
               value={searchQuery}
               onChange={handleSearch}
-              style={{
-                flex: 1,
-                padding: "8px",
-                fontSize: "1rem",
-                fontFamily: "Georgia, 'Times New Roman', serif",
-                backgroundColor: "transparent",
-                border: "1px solid #001a33",
-                color: "#001a33",
-                outline: "none",
-                marginRight: "10px",
-              }}
+              style={styles.input}
             />
             <select
               value={sortOrder}
               onChange={(e) => handleSortChange(e.target.value)}
-              style={{
-                padding: "8px",
-                fontSize: "1rem",
-                fontFamily: "Georgia, 'Times New Roman', serif",
-                border: "1px solid #001a33",
-                color: "#001a33",
-                backgroundColor: "transparent",
-                cursor: "pointer",
-                marginRight: "10px",
-              }}
+              style={styles.select}
             >
               <option value="latest">Latest to Oldest</option>
               <option value="oldest">Oldest to Latest</option>
@@ -203,15 +132,7 @@ const Drafts = () => {
             <div style={{ position: "relative" }}>
               <button
                 onClick={() => setDateFilterVisible(!dateFilterVisible)}
-                style={{
-                  padding: "8px 12px",
-                  fontSize: "1rem",
-                  fontFamily: "Georgia, 'Times New Roman', serif",
-                  border: "1px solid #001a33",
-                  color: "#001a33",
-                  backgroundColor: "transparent",
-                  cursor: "pointer",
-                }}
+                style={styles.dateButton}
               >
                 {startDate && endDate
                   ? `Start: ${startDate} -> End: ${endDate}`
@@ -237,33 +158,13 @@ const Drafts = () => {
                   min={startDate}
                   max={endDate || undefined}
                   onChange={(e) => handleDateSelect(e.target.value)}
-                  style={{
-                    position: "absolute",
-                    top: "100%",
-                    left: 0,
-                    padding: "8px",
-                    fontSize: "1rem",
-                    fontFamily: "Georgia, 'Times New Roman', serif",
-                    border: "1px solid #001a33",
-                    color: "#001a33",
-                    backgroundColor: "#fff",
-                    zIndex: 10,
-                  }}
+                  style={styles.dateInput}
                 />
               )}
             </div>
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "flex-start",
-              justifyContent: "center",
-              width: "90%",
-              maxWidth: "1000px",
-            }}
-          >
+          <div style={styles.listWrapper}>
             <DraftList drafts={filteredDrafts} navigate={navigate} />
           </div>
         </div>
@@ -277,15 +178,7 @@ const DraftList = ({ drafts, navigate }) => (
     {drafts.map((draft) => (
       <li
         key={draft._id}
-        style={{
-          padding: "5px",
-          margin: "3px 0",
-          fontSize: "1.2rem",
-          color: "#001a33",
-          cursor: "pointer",
-          transition: "transform 0.2s ease",
-          textDecoration: "underline",
-        }}
+        style={styles.listItem}
         onClick={() => navigate(`/story/${draft._id}`)}
       >
         {new Date(draft.createdAt).toLocaleDateString("en-US")} : {draft.title}
@@ -294,4 +187,4 @@ const DraftList = ({ drafts, navigate }) => (
   </ul>
 );
 
-export default Drafts;
+export default Draft;

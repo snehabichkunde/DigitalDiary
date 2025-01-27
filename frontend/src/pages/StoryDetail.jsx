@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
+import NavBar from "../components/NavBar";
 
 const StoryDetail = () => {
   const { id } = useParams();
@@ -8,7 +9,7 @@ const StoryDetail = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState("");
   const [isUnsaved, setIsUnsaved] = useState(false);
-  const [showAlert, setShowAlert] = useState(false); // State to control the alert visibility
+  const [showAlert, setShowAlert] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -16,7 +17,7 @@ const StoryDetail = () => {
       try {
         const response = await axios.get(`http://localhost:5000/api/storyRoutes/${id}`);
         setStory(response.data);
-        setEditedContent(response.data.content); 
+        setEditedContent(response.data.content);
       } catch (error) {
         console.error("Error fetching story:", error);
       }
@@ -39,7 +40,7 @@ const StoryDetail = () => {
   const handleSubmit = async () => {
     try {
       await axios.put(`http://localhost:5000/api/storyRoutes/${id}`, {
-        content: editedContent, 
+        content: editedContent,
       });
       setIsEditing(false);
       setIsUnsaved(false);
@@ -56,7 +57,7 @@ const StoryDetail = () => {
 
   const handleBackClick = () => {
     if (isUnsaved) {
-      setShowAlert(true); // Show alert dialog if there are unsaved changes
+      setShowAlert(true);
     } else {
       navigate("/home");
     }
@@ -64,11 +65,11 @@ const StoryDetail = () => {
 
   const confirmBack = () => {
     navigate("/home");
-    setShowAlert(false); // Close the alert dialog after confirming
+    setShowAlert(false);
   };
 
   const cancelBack = () => {
-    setShowAlert(false); // Close the alert dialog without navigating
+    setShowAlert(false);
   };
 
   useEffect(() => {
@@ -103,8 +104,11 @@ const StoryDetail = () => {
         backgroundImage: `url('/rose.webp')`,
         backgroundSize: "cover",
         backgroundPosition: "center",
+        marginLeft: "250px", 
+        width: "calc(100% - 250px)", 
       }}
     >
+      <NavBar />
       <div
         style={{
           position: "absolute",
@@ -164,7 +168,7 @@ const StoryDetail = () => {
             lineHeight: "24px",
             marginTop: "10px",
             textShadow: "2px 2px 8px rgba(0, 0, 0, 0.5)",
-            whiteSpace: "pre-wrap", // Preserves spaces and line breaks
+            whiteSpace: "pre-wrap",
           }}
         >
           {isEditing ? (
@@ -185,8 +189,8 @@ const StoryDetail = () => {
                 border: "none",
                 color: "#001a33",
                 boxSizing: "border-box",
-                whiteSpace: "pre-wrap", // Preserves spaces and line breaks
-                outline: "none", // Remove the blue outline
+                whiteSpace: "pre-wrap",
+                outline: "none",
               }}
             />
           ) : (
@@ -275,7 +279,6 @@ const StoryDetail = () => {
         Back
       </button>
 
-      {/* Alert Dialog */}
       {showAlert && (
         <div
           style={{

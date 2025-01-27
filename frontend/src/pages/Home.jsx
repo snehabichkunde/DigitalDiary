@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 import NavBar from "../components/NavBar";
+import styles from "../styles";
 
 const Home = () => {
   const [stories, setStories] = useState([]);
@@ -11,17 +12,17 @@ const Home = () => {
   const [dateFilterVisible, setDateFilterVisible] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchStories = async () => {
       const token = localStorage.getItem("token");
-  
+
       if (!token) {
         console.error("No token found. Please log in.");
         return;
       }
-  
+
       try {
         const response = await axios.get("http://localhost:5000/api/story/all", {
           headers: {
@@ -30,21 +31,20 @@ const Home = () => {
         });
 
         const nonDraftStories = response.data.filter((story) => story.isDraft === false);
-  
+
         const sortedStories = nonDraftStories.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
-  
+
         setStories(sortedStories);
-        setFilteredStories(sortedStories); 
+        setFilteredStories(sortedStories);
       } catch (error) {
         console.error("Error fetching stories:", error.response?.data || error.message);
       }
     };
-  
+
     fetchStories();
   }, []);
-  
 
   const handleSearch = (e) => {
     const query = e.target.value.toLowerCase();
@@ -102,100 +102,27 @@ const Home = () => {
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "row", // Keep the navbar and main content side by side
-        minHeight: "100vh", // Full height
-        overflow: "hidden",
-      }}
-    >
-      <div
-        style={{
-          width: "250px", // Sidebar width
-          flexShrink: 0, // Prevent shrinking
-        }}
-      >
+    <div style={styles.container}>
+      <div style={styles.sidebar}>
         <NavBar />
       </div>
 
-      <div
-        style={{
-          flex: 1, // Take up remaining space
-          display: "flex",
-          flexDirection: "column",
-          backgroundImage: "url('/index_page.jpeg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          padding: "0px",
-          fontFamily: "Georgia, 'Times New Roman', serif",
-          color: "#001a33",
-          overflowY: "auto", // Allow scrolling if content exceeds the screen height
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "flex-start", 
-            flex: 1,
-            width: "100%",
-            paddingTop: "30px", 
-            paddingBottom: "20px",
-          }}
-        >
-          <h2
-            style={{
-              fontSize: "2rem",
-              fontFamily: "Georgia, 'Times New Roman', serif",
-              color: "#001a33",
-              marginBottom: "20px",
-            }}
-          >
-            Your Index
-          </h2>
+      <div style={styles.content}>
+        <div style={styles.header}>
+          <h2 style={styles.h2}>Your Index</h2>
 
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "90%",
-              maxWidth: "1000px",
-              marginBottom: "20px",
-            }}
-          >
+          <div style={styles.inputWrapper}>
             <input
               type="text"
               placeholder="Search for the story"
               value={searchQuery}
               onChange={handleSearch}
-              style={{
-                flex: 1,
-                padding: "8px",
-                fontSize: "1rem",
-                fontFamily: "Georgia, 'Times New Roman', serif",
-                backgroundColor: "transparent",
-                border: "1px solid #001a33",
-                color: "#001a33",
-                outline: "none",
-                marginRight: "10px",
-              }}
+              style={styles.input}
             />
             <select
               value={sortOrder}
               onChange={(e) => handleSortChange(e.target.value)}
-              style={{
-                padding: "8px",
-                fontSize: "1rem",
-                fontFamily: "Georgia, 'Times New Roman', serif",
-                border: "1px solid #001a33",
-                color: "#001a33",
-                backgroundColor: "transparent",
-                cursor: "pointer",
-                marginRight: "10px",
-              }}
+              style={styles.select}
             >
               <option value="latest">Latest to Oldest</option>
               <option value="oldest">Oldest to Latest</option>
@@ -204,15 +131,7 @@ const Home = () => {
             <div style={{ position: "relative" }}>
               <button
                 onClick={() => setDateFilterVisible(!dateFilterVisible)}
-                style={{
-                  padding: "8px 12px",
-                  fontSize: "1rem",
-                  fontFamily: "Georgia, 'Times New Roman', serif",
-                  border: "1px solid #001a33",
-                  color: "#001a33",
-                  backgroundColor: "transparent",
-                  cursor: "pointer",
-                }}
+                style={styles.dateButton}
               >
                 {startDate && endDate
                   ? `Start: ${startDate} -> End: ${endDate}`
@@ -238,33 +157,13 @@ const Home = () => {
                   min={startDate}
                   max={endDate || undefined}
                   onChange={(e) => handleDateSelect(e.target.value)}
-                  style={{
-                    position: "absolute",
-                    top: "100%",
-                    left: 0,
-                    padding: "8px",
-                    fontSize: "1rem",
-                    fontFamily: "Georgia, 'Times New Roman', serif",
-                    border: "1px solid #001a33",
-                    color: "#001a33",
-                    backgroundColor: "#fff",
-                    zIndex: 10,
-                  }}
+                  style={styles.dateInput}
                 />
               )}
             </div>
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "flex-start",
-              justifyContent: "center",
-              width: "90%",
-              maxWidth: "1000px",
-            }}
-          >
+          <div style={styles.listWrapper}>
             <StoryList stories={filteredStories} navigate={navigate} />
           </div>
         </div>
@@ -278,15 +177,7 @@ const StoryList = ({ stories, navigate }) => (
     {stories.map((story) => (
       <li
         key={story._id}
-        style={{
-          padding: "5px",
-          margin: "3px 0",
-          fontSize: "1.2rem",
-          color: "#001a33",
-          cursor: "pointer",
-          transition: "transform 0.2s ease",
-          textDecoration: "underline",
-        }}
+        style={styles.listItem}
         onClick={() => navigate(`/story/${story._id}`)}
       >
         {new Date(story.createdAt).toLocaleDateString("en-US")} : {story.title}
