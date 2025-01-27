@@ -11,10 +11,16 @@ function Login() {
   const { user, login } = useAuth();
 
   useEffect(() => {
-    if (user) {
-      navigate("/home");
+    const token = localStorage.getItem("token");
+    if (token) {
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      const userData = JSON.parse(localStorage.getItem("user"));
+      if (userData && !user) {  
+        login(userData); 
+        navigate("/home");
+      }
     }
-  }, [user, navigate]);
+  }, [navigate, login, user]); 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,14 +29,17 @@ function Login() {
         email,
         password,
       });
-  
+
       if (response.data.message === "Login successful") {
         const token = response.data.token;
+        const userData = response.data.user;
+
         if (token) {
           localStorage.setItem("token", token);
-          console.log("Token saved successfully:", token);
-          
-          login(response.data.user);
+          localStorage.setItem("user", JSON.stringify(userData)); 
+          login(userData); 
+          console.log("Token and user saved successfully:", token);
+          navigate("/home");
         }
       } else {
         console.log("Login failed:", response.data.message);
@@ -39,8 +48,6 @@ function Login() {
       console.error("Error logging in:", error);
     }
   };
-  
-  
 
   return (
     <div className="login-page">

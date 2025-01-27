@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import NavBar from "../components/NavBar";
+
 
 const AddStory = () => {
   const [title, setTitle] = useState("");
@@ -81,8 +83,11 @@ const AddStory = () => {
         backgroundImage: `url('/rose.webp')`,
         backgroundSize: "cover",
         backgroundPosition: "center",
+        marginLeft: "250px", // Adjust based on the sidebar width
+        width: "calc(100% - 250px)", // Adjust based on the sidebar width
       }}
     >
+      <NavBar />
       {/* Date Section */}
       <div
         style={{

@@ -6,11 +6,10 @@ const PrivateRoute = ({ children }) => {
   const { user } = useAuth();
 
   if (!user) {
-    // Redirect to login if the user is not authenticated
     return <Navigate to="/login" />;
   }
 
-  return children;
+  return children; 
 };
 
 export default PrivateRoute;

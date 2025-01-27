@@ -2,49 +2,55 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/ContextProvider";
 
-const NavBar = ({ onLogout }) => {
-  const { user } = useAuth();
+const SideBar = () => {
+  const { user, logout } = useAuth(); // Access logout from useAuth
 
   const styles = {
-    navbar: {
+    sidebar: {
+      height: "100vh", // Fixed height
+      width: "250px", // Fixed width
+      background: "#2c3e50",
+      color: "#fff",
       display: "flex",
-      justifyContent: "space-between",
+      flexDirection: "column",
       alignItems: "center",
-      padding: "10px 30px",
-      background: "transparent", // Make the navbar background transparent
-      color: "#fff", // White text color to contrast with the background image
-      borderBottom: "none", // Remove the bottom border if you want it to blend completely
-      boxShadow: "none", // Remove shadow to make it look flat and seamless
+      justifyContent: "flex-start",
+      padding: "20px",
+      position: "fixed",
+      top: "0",
+      left: "0",
+      boxShadow: "2px 0 5px rgba(0,0,0,0.2)",
+      transition: "all 0.3s ease",
     },
-    leftSection: {
-      display: "flex",
-      alignItems: "center",
-      gap: "15px",
-    },
-    quote: {
-      fontSize: "18px",
-      fontWeight: "500",
-      margin: "0",
-      fontStyle: "italic", // Adds elegance
-      color: "#fff", // Use white for quote text to contrast with the background
+    header: {
+      marginBottom: "20px",
+      fontSize: "22px",
+      fontWeight: "bold",
+      textAlign: "center",
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
     },
     button: {
-      padding: "8px 16px",
-      fontSize: "14px",
+      width: "100%",
+      padding: "10px 0",
+      fontSize: "16px",
       fontWeight: "bold",
       color: "#ffffff",
-      background: "#007bff", // Professional blue
+      background: "#007bff",
       border: "none",
       borderRadius: "4px",
       cursor: "pointer",
+      margin: "10px 0",
+      textAlign: "center",
       transition: "background-color 0.3s ease",
     },
     buttonHover: {
-      backgroundColor: "#0056b3", // Darker shade of blue on hover
+      backgroundColor: "#0056b3",
     },
-    buttonContainer: {
-      display: "flex",
-      gap: "10px",
+    link: {
+      width: "100%",
+      textDecoration: "none",
     },
   };
 
@@ -56,46 +62,58 @@ const NavBar = ({ onLogout }) => {
     e.target.style.backgroundColor = styles.button.background;
   };
 
+  const handleLogout = () => {
+    logout(); // Calls logout from useAuth
+  };
+
   return (
-    <nav style={styles.navbar}>
-      <div style={styles.leftSection}>
-        <h1 style={styles.quote}>{`${user?.name || "User"}'s diary`}</h1>
-      </div>
-      <div style={styles.buttonContainer}>
-        {/* Timeline Button */}
-        <Link to="/home">
-          <button
-            style={styles.button}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-          >
-            Timeline
-          </button>
-        </Link>
+    <div style={styles.sidebar}>
+      <div style={styles.header}>{`${user?.name || "User"}'s Diary`}</div>
 
-        {/* Add Story Button */}
-        <Link to="/add">
-          <button
-            style={styles.button}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-          >
-            Add
-          </button>
-        </Link>
-
-        {/* Logout Button */}
+      {/* Timeline Button */}
+      <Link to="/home" style={styles.link}>
         <button
           style={styles.button}
-          onClick={onLogout}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >
-          Logout
+          Timeline
         </button>
-      </div>
-    </nav>
+      </Link>
+
+      {/* Add Story Button */}
+      <Link to="/add" style={styles.link}>
+        <button
+          style={styles.button}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
+          Add
+        </button>
+      </Link>
+
+      {/* Draft Button */}
+      <Link to="/draft" style={styles.link}>
+        <button
+          style={styles.button}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
+          Draft
+        </button>
+      </Link>
+
+      {/* Logout Button */}
+      <button
+        style={styles.button}
+        onClick={handleLogout} // Calls the logout handler
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        Logout
+      </button>
+    </div>
   );
 };
 
-export default NavBar;
+export default SideBar;
