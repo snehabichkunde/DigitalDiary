@@ -6,12 +6,13 @@ const storySchema = new mongoose.Schema(
     title: { type: String, required: true },
     content: { type: String, required: true },
     userId: { type: String, required: true },
+    isDraft: { type: Boolean, default: false },
+    // isFavourite: { type: Boolean, default: false }, 
   },
   {
-    timestamps: true, // Adds createdAt and updatedAt fields
+    timestamps: true, 
   }
 );
 
-// Create a Story model using the schema
 const Story = mongoose.model("Story", storySchema);
 export default Story;

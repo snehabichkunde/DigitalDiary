@@ -1,27 +1,27 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 import NavBar from "../components/NavBar";
 
-const Home = () => {
-  const [stories, setStories] = useState([]);
+const Drafts = () => {
+  const [drafts, setDrafts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredStories, setFilteredStories] = useState([]);
+  const [filteredDrafts, setFilteredDrafts] = useState([]);
   const [sortOrder, setSortOrder] = useState("");
   const [dateFilterVisible, setDateFilterVisible] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchStories = async () => {
+    const fetchDrafts = async () => {
       const token = localStorage.getItem("token");
-  
+
       if (!token) {
         console.error("No token found. Please log in.");
         return;
       }
-  
+
       try {
         const response = await axios.get("http://localhost:5000/api/story/all", {
           headers: {
@@ -29,37 +29,36 @@ const Home = () => {
           },
         });
 
-        const nonDraftStories = response.data.filter((story) => story.isDraft === false);
-  
-        const sortedStories = nonDraftStories.sort(
+        const draftEntries = response.data.filter((story) => story.isDraft === true);
+
+        const sortedDrafts = draftEntries.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
-  
-        setStories(sortedStories);
-        setFilteredStories(sortedStories); 
+
+        setDrafts(sortedDrafts);
+        setFilteredDrafts(sortedDrafts);
       } catch (error) {
-        console.error("Error fetching stories:", error.response?.data || error.message);
+        console.error("Error fetching drafts:", error.response?.data || error.message);
       }
     };
-  
-    fetchStories();
+
+    fetchDrafts();
   }, []);
-  
 
   const handleSearch = (e) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
 
-    const filtered = stories.filter((story) =>
-      story.title.toLowerCase().includes(query)
+    const filtered = drafts.filter((draft) =>
+      draft.title.toLowerCase().includes(query)
     );
-    setFilteredStories(filtered);
+    setFilteredDrafts(filtered);
   };
 
   const handleSortChange = (sortOption) => {
     setSortOrder(sortOption);
 
-    const sortedStories = [...filteredStories].sort((a, b) => {
+    const sortedDrafts = [...filteredDrafts].sort((a, b) => {
       if (sortOption === "latest") {
         return new Date(b.createdAt) - new Date(a.createdAt);
       } else if (sortOption === "oldest") {
@@ -68,7 +67,7 @@ const Home = () => {
       return 0;
     });
 
-    setFilteredStories(sortedStories);
+    setFilteredDrafts(sortedDrafts);
   };
 
   const handleDateSelect = (date) => {
@@ -83,22 +82,22 @@ const Home = () => {
 
   const applyDateFilter = (start, end) => {
     if (start && end) {
-      const filteredByDate = stories.filter((story) => {
-        const storyDate = new Date(story.createdAt);
+      const filteredByDate = drafts.filter((draft) => {
+        const draftDate = new Date(draft.createdAt);
         const startDateObj = new Date(start);
         const endDateObj = new Date(end);
 
-        return storyDate >= startDateObj && storyDate <= endDateObj;
+        return draftDate >= startDateObj && draftDate <= endDateObj;
       });
 
-      setFilteredStories(filteredByDate);
+      setFilteredDrafts(filteredByDate);
     }
   };
 
   const resetDateFilter = () => {
     setStartDate("");
     setEndDate("");
-    setFilteredStories(stories); // Reset the filtered stories to show all
+    setFilteredDrafts(drafts); // Reset the filtered drafts to show all
   };
 
   return (
@@ -138,10 +137,10 @@ const Home = () => {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            justifyContent: "flex-start", 
+            justifyContent: "flex-start",
             flex: 1,
             width: "100%",
-            paddingTop: "30px", 
+            paddingTop: "30px",
             paddingBottom: "20px",
           }}
         >
@@ -153,7 +152,7 @@ const Home = () => {
               marginBottom: "20px",
             }}
           >
-            Your Index
+            Your Drafts
           </h2>
 
           <div
@@ -168,7 +167,7 @@ const Home = () => {
           >
             <input
               type="text"
-              placeholder="Search for the story"
+              placeholder="Search for drafts"
               value={searchQuery}
               onChange={handleSearch}
               style={{
@@ -265,7 +264,7 @@ const Home = () => {
               maxWidth: "1000px",
             }}
           >
-            <StoryList stories={filteredStories} navigate={navigate} />
+            <DraftList drafts={filteredDrafts} navigate={navigate} />
           </div>
         </div>
       </div>
@@ -273,11 +272,11 @@ const Home = () => {
   );
 };
 
-const StoryList = ({ stories, navigate }) => (
+const DraftList = ({ drafts, navigate }) => (
   <ul style={{ listStyleType: "none", padding: 0 }}>
-    {stories.map((story) => (
+    {drafts.map((draft) => (
       <li
-        key={story._id}
+        key={draft._id}
         style={{
           padding: "5px",
           margin: "3px 0",
@@ -287,12 +286,12 @@ const StoryList = ({ stories, navigate }) => (
           transition: "transform 0.2s ease",
           textDecoration: "underline",
         }}
-        onClick={() => navigate(`/story/${story._id}`)}
+        onClick={() => navigate(`/story/${draft._id}`)}
       >
-        {new Date(story.createdAt).toLocaleDateString("en-US")} : {story.title}
+        {new Date(draft.createdAt).toLocaleDateString("en-US")} : {draft.title}
       </li>
     ))}
   </ul>
 );
 
-export default Home;
+export default Drafts;

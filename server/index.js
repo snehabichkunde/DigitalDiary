@@ -18,6 +18,7 @@ app.use(express.json());
 app.use("/api/auth", authRouter);
 app.use("/api/story", story);
 app.use("/api/storyRoutes", storyRoutes);
+app.use("/api/story/drafts", story);
 
 // Start the server
 const PORT = 5000;

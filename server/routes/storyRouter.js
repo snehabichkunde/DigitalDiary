@@ -3,7 +3,6 @@ import Story from "../models/Story.js";
 
 const router = express.Router();
 
-// Get a single story by ID
 router.get("/:id", async (req, res) => {
   try {
     const story = await Story.findById(req.params.id);
@@ -16,11 +15,20 @@ router.get("/:id", async (req, res) => {
 
 router.put("/:id", async (req, res) => {
   try {
+    console.log("Incoming request body:", req.body); // Debugging request body
+
+    const updatedFields = {
+      ...(req.body.title && { title: req.body.title }),
+      ...(req.body.content && { content: req.body.content }),
+      ...(typeof req.body.isDraft === "boolean" && { isDraft: req.body.isDraft }),
+    };
+
     const updatedStory = await Story.findByIdAndUpdate(
       req.params.id,
-      { $set: req.body },
+      { $set: updatedFields },
       { new: true }
     );
+
     if (!updatedStory) return res.status(404).json({ message: "Story not found" });
     res.json(updatedStory);
   } catch (error) {

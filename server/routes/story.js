@@ -16,6 +16,7 @@ router.post("/add", verifyToken, async (req, res) => {
       title,
       content,
       userId: req.user.id, 
+      isDraft: req.body.isDraft || false,
     });
 
     await newStory.save();
@@ -29,11 +30,21 @@ router.post("/add", verifyToken, async (req, res) => {
 
 router.get("/all", verifyToken, async (req, res) => {
   try {
-    const stories = await Story.find({ userId: req.user.id }); // Fetch stories specific to the user
+    const stories = await Story.find({ userId: req.user.id }); 
     return res.status(200).json(stories);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Error fetching stories" });
+  }
+});
+
+router.get("/draft", verifyToken, async (req, res) => {
+  try {
+    const drafts = await Story.find({ userId: req.user.id, isDraft: true });
+    return res.status(200).json(drafts);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Failed to fetch drafts", error });
   }
 });
 

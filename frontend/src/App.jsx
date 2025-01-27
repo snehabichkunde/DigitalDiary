@@ -7,6 +7,7 @@ import Home from "./pages/Home";
 import Register from "./pages/Signup";
 import AddStory from "./pages/AddStory";
 import StoryDetails from "./pages/StoryDetail";
+import Drafts  from "./pages/Drafts";
 import "./App.css";
 
 const App = () => {
@@ -39,6 +40,14 @@ const App = () => {
             element={
               <PrivateRoute>
                 <StoryDetails />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/draft"
+            element={
+              <PrivateRoute>
+                <Drafts />
               </PrivateRoute>
             }
           />

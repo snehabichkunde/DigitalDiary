@@ -3,7 +3,6 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import NavBar from "../components/NavBar";
 
-
 const AddStory = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -17,9 +16,7 @@ const AddStory = () => {
     setCurrentDate(date.toLocaleDateString());
   }, []);
 
-  const handleAddStory = async (e) => {
-    e.preventDefault();
-
+  const saveStory = async (isDraft) => { 
     const token = localStorage.getItem("token");
 
     if (!token) {
@@ -30,6 +27,7 @@ const AddStory = () => {
     const storyData = {
       title,
       content,
+      isDraft, 
     };
 
     try {
@@ -43,11 +41,22 @@ const AddStory = () => {
         }
       );
 
-      console.log("Story added successfully:", response.data);
-      navigate("/home");
+      console.log(isDraft ? "Story saved to drafts" : "Story added successfully:", response.data);
+
+        navigate("/home");
     } catch (error) {
-      console.error("Error adding story:", error.response?.data || error.message);
+      console.error("Error saving story:", error.response?.data || error.message);
     }
+  };
+
+  const handleAddStory = (e) => {
+    e.preventDefault();
+    saveStory(false); 
+  };
+
+  const handleAddToDraft = (e) => {
+    e.preventDefault();
+    saveStory(true); 
   };
 
   const handleTitleKeyDown = (e) => {
@@ -62,8 +71,9 @@ const AddStory = () => {
   };
 
   const confirmBack = () => {
+    saveStory(true); 
     setShowAlert(false);
-    navigate("/home"); // Navigate back to the home page
+    navigate("/home"); 
   };
 
   const cancelBack = () => {
@@ -149,7 +159,6 @@ const AddStory = () => {
 
       {/* Story Section */}
       <form
-        onSubmit={handleAddStory}
         style={{
           flex: 1,
           display: "flex",
@@ -176,24 +185,40 @@ const AddStory = () => {
             textShadow: "2px 2px 8px rgba(0, 0, 0, 0.5)",
           }}
         />
-        <button
-          type="submit"
-          style={{
-            backgroundColor: "#001a33",
-            color: "white",
-            padding: "8px 16px",
-            fontSize: "1rem",
-            fontWeight: "bold",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
-            alignSelf: "flex-start",
-            fontFamily: "Georgia, 'Times New Roman', serif",
-            marginTop: "20px",
-          }}
-        >
-          Submit Story
-        </button>
+        <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
+          <button
+            onClick={handleAddStory}
+            style={{
+              backgroundColor: "#001a33",
+              color: "white",
+              padding: "8px 16px",
+              fontSize: "1rem",
+              fontWeight: "bold",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+              fontFamily: "Georgia, 'Times New Roman', serif",
+            }}
+          >
+            Submit Story
+          </button>
+          <button
+            onClick={handleAddToDraft}
+            style={{
+              backgroundColor: "#001a33",
+              color: "white",
+              padding: "8px 16px",
+              fontSize: "1rem",
+              fontWeight: "bold",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+              fontFamily: "Georgia, 'Times New Roman', serif",
+            }}
+          >
+            Save to Draft
+          </button>
+        </div>
       </form>
 
       {/* Back Button */}
@@ -234,7 +259,7 @@ const AddStory = () => {
           }}
         >
           <p style={{ fontSize: "1.2rem", marginBottom: "20px" }}>
-            Your story won't be saved. Are you sure you want to go back?
+            Your story won't be saved. Do you want to save it to drafts before going back?
           </p>
           <button
             onClick={confirmBack}
@@ -249,7 +274,7 @@ const AddStory = () => {
               marginRight: "10px",
             }}
           >
-            OK
+            Yes, Save to Draft
           </button>
           <button
             onClick={cancelBack}
@@ -263,7 +288,7 @@ const AddStory = () => {
               cursor: "pointer",
             }}
           >
-            Cancel
+            No, Cancel
           </button>
         </div>
       )}
