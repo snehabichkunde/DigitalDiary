@@ -41,12 +41,14 @@ const StoryDetail = () => {
     try {
       await axios.put(`http://localhost:5000/api/storyRoutes/${id}`, {
         content: editedContent,
+        isDraft: false,  
       });
       setIsEditing(false);
       setIsUnsaved(false);
       setStory((prevStory) => ({
         ...prevStory,
         content: editedContent,
+        isDraft: false,  
         createdAt: new Date().toISOString(),
       }));
       navigate("/home");
@@ -54,6 +56,7 @@ const StoryDetail = () => {
       console.error("Error updating story:", error);
     }
   };
+  
 
   const handleBackClick = () => {
     if (isUnsaved) {
@@ -62,15 +65,30 @@ const StoryDetail = () => {
       navigate("/home");
     }
   };
-
-  const confirmBack = () => {
-    navigate("/home");
-    setShowAlert(false);
+  
+  const saveAsDraft = async () => {
+    try {
+      await axios.put(`http://localhost:5000/api/storyRoutes/${id}`, {
+        content: editedContent,
+        isDraft: true,
+      });
+      setIsUnsaved(false);
+      setShowAlert(false);
+      navigate("/home");
+    } catch (error) {
+      console.error("Error saving story as draft:", error);
+    }
   };
-
+  
+  const confirmBack = () => {
+    setShowAlert(false);
+    navigate("/home");
+  };
+  
   const cancelBack = () => {
     setShowAlert(false);
   };
+  
 
   useEffect(() => {
     const handleBeforeUnload = (event) => {
@@ -280,54 +298,70 @@ const StoryDetail = () => {
       </button>
 
       {showAlert && (
-        <div
-          style={{
-            position: "fixed",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            backgroundColor: "white",
-            padding: "20px",
-            borderRadius: "8px",
-            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-            zIndex: 1000,
-            textAlign: "center",
-          }}
-        >
-          <p style={{ fontSize: "1.2rem", marginBottom: "20px" }}>
-            Your story won't be saved. Are you sure you want to go back?
-          </p>
-          <button
-            onClick={confirmBack}
-            style={{
-              backgroundColor: "#001a33",
-              color: "white",
-              padding: "8px 16px",
-              fontSize: "1rem",
-              border: "none",
-              borderRadius: "5px",
-              cursor: "pointer",
-              marginRight: "10px",
-            }}
-          >
-            OK
-          </button>
-          <button
-            onClick={cancelBack}
-            style={{
-              backgroundColor: "#001a33",
-              color: "white",
-              padding: "8px 16px",
-              fontSize: "1rem",
-              border: "none",
-              borderRadius: "5px",
-              cursor: "pointer",
-            }}
-          >
-            Cancel
-          </button>
-        </div>
-      )}
+  <div
+    style={{
+      position: "fixed",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      backgroundColor: "white",
+      padding: "20px",
+      borderRadius: "8px",
+      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+      zIndex: 1000,
+      textAlign: "center",
+    }}
+  >
+    <p style={{ fontSize: "1.2rem", marginBottom: "20px" }}>
+      You have unsaved changes. Would you like to save them as a draft before leaving?
+    </p>
+    <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+      <button
+        onClick={saveAsDraft}
+        style={{
+          backgroundColor: "#001a33",
+          color: "white",
+          padding: "8px 16px",
+          fontSize: "1rem",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+        }}
+      >
+        Save as Draft
+      </button>
+      <button
+        onClick={confirmBack}
+        style={{
+          backgroundColor: "#001a33",
+          color: "white",
+          padding: "8px 16px",
+          fontSize: "1rem",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+        }}
+      >
+        Don't Save
+      </button>
+      <button
+        onClick={cancelBack}
+        style={{
+          backgroundColor: "#001a33",
+          color: "white",
+          padding: "8px 16px",
+          fontSize: "1rem",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+        }}
+      >
+        Cancel
+      </button>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };

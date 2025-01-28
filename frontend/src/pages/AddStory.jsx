@@ -79,6 +79,7 @@ const AddStory = () => {
 
   const cancelBack = () => {
     setShowAlert(false);
+    navigate("/home");
   };
 
   return (
