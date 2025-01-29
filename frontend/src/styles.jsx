@@ -13,13 +13,14 @@ const styles = {
       flex: 1,
       display: "flex",
       flexDirection: "column",
-      backgroundImage: "url('/index_page.jpeg')",
-      backgroundSize: "cover",
-      backgroundPosition: "center",
+      backgroundColor: "#fdf4dc",
       padding: "0px",
       fontFamily: "Georgia, 'Times New Roman', serif",
       color: "#001a33",
       overflowY: "auto",
+      backgroundImage: `url('/rose.webp')`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
     },
     header: {
       display: "flex",
@@ -67,6 +68,39 @@ const styles = {
       marginRight: "10px",
     },
     dateButton: {
+      padding: "8px 16px",
+      fontSize: "1rem",
+      fontFamily: "Georgia, 'Times New Roman', serif",
+      border: "1px solid #001a33",
+      color: "#001a33",
+      backgroundColor: "transparent",
+      cursor: "pointer",
+      textAlign: "left",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      whiteSpace: "nowrap",
+    },
+    datePickerContainer: {
+      backgroundColor: "#fff",
+      border: "1px solid #ccc",
+      borderRadius: "4px",
+      padding: "10px",
+      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+      zIndex: 10,
+      marginTop: "4px",
+    },
+    dateInput: {
+      padding: "8px",
+      border: "none",
+      borderRadius: "4px",
+      fontSize: "1rem",
+      fontFamily: "Georgia, 'Times New Roman', serif",
+      boxShadow: "none",
+      backgroundColor: "#f0f0f0",
+    },
+  
+    applyButton: {
       padding: "8px 12px",
       fontSize: "1rem",
       fontFamily: "Georgia, 'Times New Roman', serif",
@@ -74,18 +108,6 @@ const styles = {
       color: "#001a33",
       backgroundColor: "transparent",
       cursor: "pointer",
-    },
-    dateInput: {
-      position: "absolute",
-      top: "100%",
-      left: 0,
-      padding: "8px",
-      fontSize: "1rem",
-      fontFamily: "Georgia, 'Times New Roman', serif",
-      border: "1px solid #001a33",
-      color: "#001a33",
-      backgroundColor: "#fff",
-      zIndex: 10,
     },
     listWrapper: {
       display: "flex",
@@ -107,4 +129,3 @@ const styles = {
   };
   
   export default styles;
-  

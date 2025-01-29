@@ -7,7 +7,8 @@ const AddStory = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [currentDate, setCurrentDate] = useState("");
-  const [showAlert, setShowAlert] = useState(false); // State for showing the alert
+  const [showAlert, setShowAlert] = useState(false);
+  const [isBackConfirmation, setIsBackConfirmation] = useState(false);
   const [selectedTags, setSelectedTags] = useState({
     isFavorite: false,
     isPoem: false,
@@ -20,32 +21,30 @@ const AddStory = () => {
     isReminder: false,
     isHappy: false,
     isSad: false,
-  }); // State to store selected tags
+  });
   const navigate = useNavigate();
-  const storyRef = useRef(null); // Reference to the story textarea
+  const storyRef = useRef(null);
 
   useEffect(() => {
     const date = new Date();
     setCurrentDate(date.toLocaleDateString());
   }, []);
 
-  const saveStory = async (isDraft, selectedTags) => {
+  const saveStory = async (isDraft) => {
     const token = localStorage.getItem("token");
-  
+
     if (!token) {
       console.error("No token found. Please log in.");
       return;
     }
-  
-    // Merging selectedTags with other story data, including tags as individual fields
+
     const storyData = {
       title,
       content,
       isDraft,
-      ...selectedTags, // Spread selectedTags to include all the tags
+      ...selectedTags,
     };
-    // console.log("Payload being sent to server:", storyData); // Logs full story data with selected tags
-  
+
     try {
       const response = await axios.post(
         "http://localhost:5000/api/story/add",
@@ -56,24 +55,27 @@ const AddStory = () => {
           },
         }
       );
-  
-      console.log(isDraft ? "Story saved to drafts" : "Story added successfully:", response.data);
+
+      console.log(
+        isDraft ? "Story saved to drafts" : "Story added successfully:",
+        response.data
+      );
       navigate("/home");
     } catch (error) {
       console.error("Error saving story:", error.response?.data || error.message);
     }
   };
-  
 
-  const handleAddStory = (e) => {
-    e.preventDefault();
-    saveStory(false, selectedTags); // Submit the story with selected tags
-  };
+    const handleAddStory = (e) => {
+        e.preventDefault();
+        saveStory(false);
+      };
+    
+      const handleAddToDraft = (e) => {
+        e.preventDefault();
+        saveStory(true);
+      };
 
-  const handleAddToDraft = (e) => {
-    e.preventDefault();
-    saveStory(true, selectedTags); // Save story as a draft with selected tags
-  };
 
   const handleTitleKeyDown = (e) => {
     if (e.key === "Enter") {
@@ -83,18 +85,20 @@ const AddStory = () => {
   };
 
   const handleBackClick = () => {
+    setIsBackConfirmation(true);
     setShowAlert(true);
   };
 
   const confirmBack = () => {
-    saveStory(true, selectedTags); // Save as draft when navigating away
+      saveStory(true);
     setShowAlert(false);
+    setIsBackConfirmation(false);
     navigate("/home");
   };
 
   const cancelBack = () => {
     setShowAlert(false);
-    navigate("/home");
+    setIsBackConfirmation(false);
   };
 
   const handleTagChange = (e) => {
@@ -106,8 +110,19 @@ const AddStory = () => {
   };
 
   const handleSaveTags = () => {
-    // console.log("Tags saved:", selectedTags); // Log the selected tags
-    setShowAlert(false); // Close the tag selection modal
+    setShowAlert(false);
+  };
+
+  const commonButtonStyle = {
+    backgroundColor: "#001a33",
+    color: "white",
+    padding: "8px 16px",
+    fontSize: "1rem",
+    fontWeight: "bold",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+    fontFamily: "Georgia, 'Times New Roman', serif",
   };
 
   return (
@@ -123,12 +138,11 @@ const AddStory = () => {
         backgroundImage: `url('/rose.webp')`,
         backgroundSize: "cover",
         backgroundPosition: "center",
-        marginLeft: "250px", // Adjust based on the sidebar width
-        width: "calc(100% - 250px)", // Adjust based on the sidebar width
+        marginLeft: "250px",
+        width: "calc(100% - 250px)",
       }}
     >
       <NavBar />
-      {/* Date Section */}
       <div
         style={{
           position: "absolute",
@@ -142,8 +156,6 @@ const AddStory = () => {
       >
         {currentDate}
       </div>
-
-      {/* Title Section */}
       <div
         style={{
           display: "flex",
@@ -186,8 +198,6 @@ const AddStory = () => {
           }}
         />
       </div>
-
-      {/* Story Section */}
       <form
         style={{
           flex: 1,
@@ -215,62 +225,32 @@ const AddStory = () => {
             textShadow: "2px 2px 8px rgba(0, 0, 0, 0.5)",
           }}
         />
-        <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
-          <button
-            onClick={handleAddStory}
-            style={{
-              backgroundColor: "#001a33",
-              color: "white",
-              padding: "8px 16px",
-              fontSize: "1rem",
-              fontWeight: "bold",
-              border: "none",
-              borderRadius: "5px",
-              cursor: "pointer",
-              fontFamily: "Georgia, 'Times New Roman', serif",
-            }}
-          >
+        <div
+          style={{
+            display: "flex",
+            gap: "10px",
+            marginTop: "20px",
+            justifyContent: "flex-start",
+          }}
+        >
+          <button type="button" onClick={handleAddStory} style={commonButtonStyle}>
             Submit Story
           </button>
-          <button
-            onClick={handleAddToDraft}
-            style={{
-              backgroundColor: "#001a33",
-              color: "white",
-              padding: "8px 16px",
-              fontSize: "1rem",
-              fontWeight: "bold",
-              border: "none",
-              borderRadius: "5px",
-              cursor: "pointer",
-              fontFamily: "Georgia, 'Times New Roman', serif",
-            }}
-          >
+            <button type="button" onClick={handleAddToDraft} style={commonButtonStyle}>
             Save to Draft
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowAlert(true)}
+            style={commonButtonStyle}
+          >
+            Add Tags
+          </button>
+          <button type="button" onClick={handleBackClick} style={commonButtonStyle}>
+            Back
           </button>
         </div>
       </form>
-
-      {/* Add Tags Button */}
-      <button
-        onClick={() => setShowAlert(true)}
-        style={{
-          backgroundColor: "#001a33",
-          color: "white",
-          padding: "8px 16px",
-          fontSize: "1rem",
-          fontWeight: "bold",
-          border: "none",
-          borderRadius: "5px",
-          cursor: "pointer",
-          fontFamily: "Georgia, 'Times New Roman', serif",
-          marginTop: "20px",
-        }}
-      >
-        Add Tags
-      </button>
-
-      {/* Tag Selection Alert */}
       {showAlert && (
         <div
           style={{
@@ -287,54 +267,62 @@ const AddStory = () => {
           }}
         >
           <p style={{ fontSize: "1.2rem", marginBottom: "20px" }}>
-            Select tags for your story:
+            {isBackConfirmation
+              ? "Do you want to save the story to drafts before leaving?"
+              : "Select tags for your story:"}
           </p>
-          {Object.keys(selectedTags).map((tag) => (
-            tag !== "isDraft" && (
-              <label key={tag} style={{ display: "block", marginBottom: "10px" }}>
-                <input
-                  type="checkbox"
-                  name={tag}
-                  checked={selectedTags[tag]}
-                  onChange={handleTagChange}
-                />
-                {tag.replace("is", "")}
-              </label>
-            )
-          ))}
+          {!isBackConfirmation &&
+            Object.keys(selectedTags).map((tag) => (
+              tag !== "isDraft" && (
+                <label
+                  key={tag}
+                  style={{ display: "block", marginBottom: "10px" }}
+                >
+                  <input
+                    type="checkbox"
+                    name={tag}
+                    checked={selectedTags[tag]}
+                    onChange={handleTagChange}
+                  />
+                  {tag.replace("is", "")}
+                </label>
+              )
+            ))}
           <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
-            <button
-              onClick={handleSaveTags}
-              style={{
-                backgroundColor: "#001a33",
-                color: "white",
-                padding: "8px 16px",
-                fontSize: "1rem",
-                fontWeight: "bold",
-                border: "none",
-                borderRadius: "5px",
-                cursor: "pointer",
-                fontFamily: "Georgia, 'Times New Roman', serif",
-              }}
-            >
-              Save Tags
-            </button>
-            <button
-              onClick={cancelBack}
-              style={{
-                backgroundColor: "#f44336",
-                color: "white",
-                padding: "8px 16px",
-                fontSize: "1rem",
-                fontWeight: "bold",
-                border: "none",
-                borderRadius: "5px",
-                cursor: "pointer",
-                fontFamily: "Georgia, 'Times New Roman', serif",
-              }}
-            >
-              Cancel
-            </button>
+              {isBackConfirmation ? (
+                <>
+                    <button
+                      onClick={confirmBack}
+                      style={commonButtonStyle}
+                    >
+                      Save Draft
+                    </button>
+                    <button
+                      onClick={cancelBack}
+                      style={{
+                        ...commonButtonStyle,
+                        backgroundColor: "#f44336",
+                      }}
+                    >
+                      Discard
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button onClick={handleSaveTags} style={commonButtonStyle}>
+                      Save Tags
+                    </button>
+                    <button
+                      onClick={cancelBack}
+                      style={{
+                        ...commonButtonStyle,
+                        backgroundColor: "#f44336",
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </>
+              )}
           </div>
         </div>
       )}
