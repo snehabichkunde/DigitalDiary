@@ -6,28 +6,25 @@ const router = express.Router();
 
 router.post("/add", verifyToken, async (req, res) => {
   try {
-    const { title, content, tags, isDraft } = req.body; // Extract isDraft along with other fields
+    const { title, content, isDraft, ...tags } = req.body;
+    
 
-    console.log('Received tags:', tags); // Debugging: log received tags
-
-    // Validation
     if (!title || !content) {
       return res.status(400).json({ message: "Title and content are required" });
     }
 
-    // Ensure tags is an object and assign default values to all tags
     const tagFields = {
-      isPoem: typeof tags?.isPoem === 'boolean' ? tags.isPoem : false,
-      isFavorite: typeof tags?.isFavorite === 'boolean' ? tags.isFavorite : false,
-      isBlog: typeof tags?.isBlog === 'boolean' ? tags.isBlog : false,
-      isNotes: typeof tags?.isNotes === 'boolean' ? tags.isNotes : false,
-      isJournal: typeof tags?.isJournal === 'boolean' ? tags.isJournal : false,
-      isPersonal: typeof tags?.isPersonal === 'boolean' ? tags.isPersonal : false,
-      isTravel: typeof tags?.isTravel === 'boolean' ? tags.isTravel : false,
-      isReflective: typeof tags?.isReflective === 'boolean' ? tags.isReflective : false,
-      isReminder: typeof tags?.isReminder === 'boolean' ? tags.isReminder : false,
-      isHappy: typeof tags?.isHappy === 'boolean' ? tags.isHappy : false,
-      isSad: typeof tags?.isSad === 'boolean' ? tags.isSad : false,
+      isPoem: typeof tags.isPoem === 'boolean' ? tags.isPoem : false,
+      isFavorite: typeof tags.isFavorite === 'boolean' ? tags.isFavorite : false,
+      isBlog: typeof tags.isBlog === 'boolean' ? tags.isBlog : false,
+      isNotes: typeof tags.isNotes === 'boolean' ? tags.isNotes : false,
+      isJournal: typeof tags.isJournal === 'boolean' ? tags.isJournal : false,
+      isPersonal: typeof tags.isPersonal === 'boolean' ? tags.isPersonal : false,
+      isTravel: typeof tags.isTravel === 'boolean' ? tags.isTravel : false,
+      isReflective: typeof tags.isReflective === 'boolean' ? tags.isReflective : false,
+      isReminder: typeof tags.isReminder === 'boolean' ? tags.isReminder : false,
+      isHappy: typeof tags.isHappy === 'boolean' ? tags.isHappy : false,
+      isSad: typeof tags.isSad === 'boolean' ? tags.isSad : false,
     };
 
     // Create the story document with tags and isDraft

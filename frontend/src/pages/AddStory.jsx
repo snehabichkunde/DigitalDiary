@@ -44,7 +44,7 @@ const AddStory = () => {
       isDraft,
       ...selectedTags, // Spread selectedTags to include all the tags
     };
-    console.log("Payload being sent to server:", storyData); // Logs full story data with selected tags
+    // console.log("Payload being sent to server:", storyData); // Logs full story data with selected tags
   
     try {
       const response = await axios.post(
@@ -106,7 +106,7 @@ const AddStory = () => {
   };
 
   const handleSaveTags = () => {
-    console.log("Tags saved:", selectedTags); // Log the selected tags
+    // console.log("Tags saved:", selectedTags); // Log the selected tags
     setShowAlert(false); // Close the tag selection modal
   };
 
