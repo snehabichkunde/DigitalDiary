@@ -4,41 +4,48 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [emailError, setEmailError] = useState("");
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
+        setEmailError(""); // Resetting error if any
+
         // Check if all fields are filled
         if (!name || !email || !password) {
-            alert("All fields are required!");
+            setEmailError("All fields are required!");
             return;
         }
-    
+
         try {
             const response = await axios.post('http://localhost:5000/api/auth/register', { name, email, password });
             console.log(response.data); // Log the response to see the structure
-    
+
             if (response.data.success) {
                 alert(response.data.message); // 'Account created successfully'
                 navigate('/');
             } else {
-                alert(response.data.message); // 'Email already exists' or any other backend error
+                console.log("Signup failed:", response.data.message);
                 if (response.data.message === 'Email already exists') {
-                    navigate('/login'); // Redirect to login
-                }
+                     setEmailError('Email already exists. Please try another one or login.');
+                }else {
+                     setEmailError(response.data.message)
+                 }
+
             }
         } catch (error) {
             console.error(error);
-            alert('An error occurred during registration. Please try again.');
+              if (error.response && error.response.data && error.response.data.message === 'Email already exists') {
+                   setEmailError('Email already exists. Please try another one or login.');
+               } else{
+                    setEmailError('An error occurred during registration. Please try again.');
+                }
         }
     };
-    
-    
-    
+
 
     return (
         <div style={styles.container}>
@@ -66,6 +73,7 @@ const Signup = () => {
                             required
                             style={styles.input}
                         />
+                           {emailError && <p style={styles.errorMessage}>{emailError}</p>}
                     </div>
                     <div style={styles.inputGroup}>
                         <label htmlFor="password" style={styles.label}>Password</label>
@@ -179,6 +187,12 @@ const styles = {
             fontSize: "12px", // Smaller text for switch
         },
     },
+  errorMessage: {
+        color: "red",
+        marginTop: "10px",
+        fontSize: "0.9rem",
+        textAlign: 'left'
+    }
 };
 
 export default Signup;

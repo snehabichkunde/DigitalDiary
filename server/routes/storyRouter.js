@@ -21,7 +21,6 @@ router.get("/:id", async (req, res) => {
 
 router.put("/:id", async (req, res) => {
   try {
-      console.log("Incoming request body:", req.body); // Debugging request body
      const { title, content, isDraft, ...tags } = req.body;
 
       const updatedFields = {};
