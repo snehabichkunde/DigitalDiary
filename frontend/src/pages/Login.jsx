@@ -20,6 +20,14 @@ function Login() {
                 login(userData);
                 navigate("/home");
             }
+            axios.get("http://localhost:5000/api/auth/verify-token")
+                .catch((error) => {
+                    if (error.response && error.response.status === 403) {
+                        localStorage.removeItem("token");
+                        localStorage.removeItem("user");
+                        navigate("/login");
+                    }
+                });
         }
     }, [navigate, login, user]);
 

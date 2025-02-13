@@ -1,6 +1,7 @@
 //auth.js
 import express from 'express';
 import User from '../models/User.js';
+import { verifyToken } from "./middleware.js";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
@@ -41,7 +42,7 @@ router.post('/login', async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(401).json({ success: false, message: 'Invalid credentials' });
 
-        const token = jwt.sign({ id: user._id }, jwtSecret, { expiresIn: '5h' });
+        const token = jwt.sign({ id: user._id }, jwtSecret, { expiresIn: '1m' });
 
         return res.status(200).json({
             success: true,
@@ -53,6 +54,10 @@ router.post('/login', async (req, res) => {
         console.error(error);
         return res.status(500).json({ success: false, message: 'Error logging in' });
     }
+});
+
+router.get("/verify-token", verifyToken, (req, res) => {
+    res.status(200).json({ message: "Token is valid" });
 });
 
 
