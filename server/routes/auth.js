@@ -3,9 +3,11 @@ import express from 'express';
 import User from '../models/User.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const router = express.Router();
-const jwtSecret = "sneha's_dairy.jwtsecrt"; 
+const jwtSecret = process.env.JWT_SECRET;
 
 router.post('/register', async (req, res) => {
     try {
