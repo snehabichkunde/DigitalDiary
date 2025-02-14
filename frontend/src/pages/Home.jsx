@@ -51,7 +51,6 @@ const Home = () => {
                 });
                 setAllTags(Array.from(tags));
 
-
             } catch (error) {
                 console.error(
                     "Error fetching stories:",
@@ -87,6 +86,7 @@ const Home = () => {
 
         setFilteredStories(sortedStories);
     };
+
     const handleTagSelect = (e) => {
         const selected = e.target.value;
         setSelectedTag(selected);
@@ -102,33 +102,33 @@ const Home = () => {
 
     const handleDateSelect = (date) => {
         if (!startDate) {
-          setStartDate(date);
+            setStartDate(date);
         } else if (!endDate && new Date(date) >= new Date(startDate)) {
-          setEndDate(date);
-          setDateFilterVisible(false);
-          applyDateFilter(startDate, date);
+            setEndDate(date);
+            setDateFilterVisible(false);
+            applyDateFilter(startDate, date);
         }
-      };
+    };
 
-      const applyDateFilter = (start, end) => {
+    const applyDateFilter = (start, end) => {
         if (start && end) {
-          const filteredByDate = stories.filter((story) => {
-            const storyDate = new Date(story.createdAt);
-            const startDateObj = new Date(start);
-            const endDateObj = new Date(end);
+            const filteredByDate = stories.filter((story) => {
+                const storyDate = new Date(story.createdAt);
+                const startDateObj = new Date(start);
+                const endDateObj = new Date(end);
 
-            return storyDate >= startDateObj && storyDate <= endDateObj;
-          });
+                return storyDate >= startDateObj && storyDate <= endDateObj;
+            });
 
-          setFilteredStories(filteredByDate);
+            setFilteredStories(filteredByDate);
         }
-      };
+    };
 
-      const resetDateFilter = () => {
-          setStartDate("");
-          setEndDate("");
+    const resetDateFilter = () => {
+        setStartDate("");
+        setEndDate("");
         setFilteredStories(stories);
-      };
+    };
 
     return (
         <div style={styles.container}>
