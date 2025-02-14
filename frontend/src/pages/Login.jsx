@@ -1,16 +1,25 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./Login.css";
 import { useAuth } from "../context/ContextProvider";
 
 function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [error, setError] = useState(""); // State for error message
+    const [error, setError] = useState(""); 
     const navigate = useNavigate();
+    const location = useLocation();
     const { user, login } = useAuth();
 
+    // Store last visited page in sessionStorage
+    useEffect(() => {
+        if (location.pathname !== "/login" && location.pathname !== "/register") {
+            sessionStorage.setItem("lastPath", location.pathname);
+        }
+    }, [location]);
+
+    // Check if user is logged in and redirect accordingly
     useEffect(() => {
         const token = localStorage.getItem("token");
         if (token) {
@@ -18,22 +27,18 @@ function Login() {
             const userData = JSON.parse(localStorage.getItem("user"));
             if (userData && !user) {
                 login(userData);
-                navigate("/home");
+                const lastPath = sessionStorage.getItem("lastPath") || "/home"; // Default to home
+                navigate(lastPath);
             }
-            axios.get("http://localhost:5000/api/auth/verify-token")
-                .catch((error) => {
-                    if (error.response && error.response.status === 403) {
-                        localStorage.removeItem("token");
-                        localStorage.removeItem("user");
-                        navigate("/login");
-                    }
-                });
+        } else {
+            navigate("/login");
         }
     }, [navigate, login, user]);
 
-   const handleSubmit = async (e) => {
+    // Handle form submission
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        setError(""); // Clear previous errors
+        setError("");
 
         try {
             const response = await axios.post("http://localhost:5000/api/auth/login", {
@@ -49,39 +54,19 @@ function Login() {
                     localStorage.setItem("token", token);
                     localStorage.setItem("user", JSON.stringify(userData));
                     login(userData);
-                    console.log("Token and user saved successfully:", token);
-                    navigate("/home");
+
+                    // Redirect to last visited path
+                    const lastPath = sessionStorage.getItem("lastPath") || "/home";
+                    navigate(lastPath);
                 }
             } else {
-                 if (response.data.message.includes("email")) {
-                    setError("Invalid email address. Please check your email.");
-                  } else if (response.data.message.includes("password")) {
-                    setError("Invalid password. Please check your password.");
-                  } else if (response.data.message.includes("credentials")) {
-                    setError("Invalid email or password. Please check your credentials.");
-                  }
-                  else {
-                    setError(response.data.message); // Set generic error message from the backend
-                  }
+                setError(response.data.message);
             }
         } catch (err) {
             console.error("Error logging in:", err);
-            if (err.response && err.response.data && err.response.data.message) {
-                 if (err.response.data.message.includes("email")) {
-                    setError("Invalid email address. Please check your email.");
-                  } else if (err.response.data.message.includes("password")) {
-                     setError("Invalid password. Please check your password.");
-                  }else if(err.response.data.message.includes("credentials")) {
-                    setError("Invalid email or password. Please check your credentials.");
-                  }else{
-                    setError(err.response.data.message);
-                  }
-            } else {
-                setError("An error occurred during login. Please try again.");
-            }
+            setError("An error occurred during login. Please try again.");
         }
     };
-
 
     return (
         <div className="login-page">
@@ -109,7 +94,7 @@ function Login() {
                         <span>OR</span>
                         <hr />
                     </div>
-                     <p className="signup-text">
+                    <p className="signup-text">
                         Don't have an account? <a href="/register">Sign up</a>
                     </p>
                 </div>
