@@ -18,7 +18,6 @@ const styles = {
       fontFamily: "Georgia, 'Times New Roman', serif",
       color: "#001a33",
       overflowY: "auto",
-      backgroundImage: `url('/rose.webp')`,
       backgroundSize: "cover",
       backgroundPosition: "center",
     },
