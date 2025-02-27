@@ -2,6 +2,11 @@
 
 A personal diary application where users can write, manage, and categorize their thoughts, memories, and notes.
 
+## 🚀 Live Demo
+🔗 **Frontend:** [Digital Diary](https://digital-diary-sneha.netlify.app/)  
+🔗 **Backend API:** [Digital Diary API](https://digitaldiary-vkw0.onrender.com/)  
+
+
 ## Features
 - Create, edit, and delete diary entries
 - Categorize entries with tags (e.g., Personal, Motivational, Travel, etc.)
