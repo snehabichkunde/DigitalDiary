@@ -9,6 +9,10 @@ import storyRoutes from "./routes/storyRouter.js";
 dotenv.config();
 
 const app = express();
+app.get("/", (req, res) => {
+  res.send("Server is running!");
+});
+
 
 // Middleware
 app.use(cors());
