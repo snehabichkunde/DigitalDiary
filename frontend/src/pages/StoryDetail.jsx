@@ -168,7 +168,6 @@ return (
       fontFamily: "Georgia, 'Times New Roman', serif",
       padding: "20px",
       position: "relative",
-      backgroundImage: `url('/rose.webp')`,
       backgroundSize: "cover",
       backgroundPosition: "center",
       marginLeft: "250px",
