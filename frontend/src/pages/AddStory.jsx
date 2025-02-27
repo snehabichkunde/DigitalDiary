@@ -47,7 +47,7 @@ const AddStory = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/story/add",
+        "https://digitaldiary-vkw0.onrender.com/api/story/add",
         storyData,
         {
           headers: {

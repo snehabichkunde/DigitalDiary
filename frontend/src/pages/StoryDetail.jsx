@@ -18,7 +18,7 @@ useEffect(() => {
   const fetchStory = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/storyRoutes/${id}`
+        `https://digitaldiary-vkw0.onrender.com/api/storyRoutes/${id}`
       );
       setStory(response.data);
       setEditedContent(response.data.content);
@@ -43,7 +43,7 @@ useEffect(() => {
 
 const handleDelete = async () => {
   try {
-    await axios.delete(`http://localhost:5000/api/storyRoutes/${id}`);
+    await axios.delete(`https://digitaldiary-vkw0.onrender.com/api/storyRoutes/${id}`);
     navigate("/home");
   } catch (error) {
     console.error("Error deleting story:", error);
@@ -53,7 +53,7 @@ const handleDelete = async () => {
 const handleSubmit = async () => {
   try {
     const response = await axios.put(
-      `http://localhost:5000/api/storyRoutes/${id}`,
+      `https://digitaldiary-vkw0.onrender.com/api/storyRoutes/${id}`,
       {
         content: editedContent,
         ...editedTags,
@@ -86,7 +86,7 @@ const handleBackClick = () => {
 
 const saveAsDraft = async () => {
   try {
-    const response = await axios.put(`http://localhost:5000/api/storyRoutes/${id}`, {
+    const response = await axios.put(`https://digitaldiary-vkw0.onrender.com/api/storyRoutes/${id}`, {
       content: editedContent,
         ...editedTags,
       isDraft: true,

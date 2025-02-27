@@ -26,7 +26,7 @@ const Draft = () => {
             }
 
             try {
-                const response = await axios.get("http://localhost:5000/api/story/all", {
+                const response = await axios.get("https://digitaldiary-vkw0.onrender.com/api/story/all", {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },

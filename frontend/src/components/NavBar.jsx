@@ -68,7 +68,8 @@ const SideBar = () => {
 
   return (
     <div style={styles.sidebar}>
-      <div style={styles.header}>{`${user?.name || "User"}'s Diary`}</div>
+      <div style={styles.header}>{`${user?.name?.split(" ")[0] || "User"}'s Diary`}</div>
+
 
       {/* Timeline Button */}
       <Link to="/home" style={styles.link}>

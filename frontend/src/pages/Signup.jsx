@@ -21,7 +21,7 @@ const Signup = () => {
         }
 
         try {
-            const response = await axios.post('http://localhost:5000/api/auth/register', { name, email, password });
+            const response = await axios.post('https://digitaldiary-vkw0.onrender.com/api/auth/register', { name, email, password });
             console.log(response.data); // Log the response to see the structure
 
             if (response.data.success) {
