@@ -21,7 +21,7 @@ app.use("/api/storyRoutes", storyRoutes);
 app.use("/api/story/drafts", story);
 
 // Start the server
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   connectToMongoDB();
   console.log(`Server is running on port ${PORT}`);
