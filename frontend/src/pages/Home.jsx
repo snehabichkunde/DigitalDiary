@@ -1,3 +1,4 @@
+// Home.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -131,7 +132,7 @@ const Home = () => {
     };
 
     return (
-        <div style={styles.container}>
+        <div style={{...styles.container, backgroundColor: "#ffffff", minHeight: "100vh"}}>
             <div style={styles.sidebar}>
                 <NavBar />
             </div>
@@ -180,12 +181,7 @@ const Home = () => {
                                 {startDate && endDate && (
                                     <span
                                         onClick={resetDateFilter}
-                                        style={{
-                                            marginLeft: "10px",
-                                            color: "#001a33",
-                                            cursor: "pointer",
-                                            fontWeight: "bold",
-                                        }}
+                                        style={styles.resetDate}
                                     >
                                         ×
                                     </span>

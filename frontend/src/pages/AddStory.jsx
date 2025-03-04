@@ -66,16 +66,15 @@ const AddStory = () => {
     }
   };
 
-    const handleAddStory = (e) => {
-        e.preventDefault();
-        saveStory(false);
-      };
-    
-      const handleAddToDraft = (e) => {
-        e.preventDefault();
-        saveStory(true);
-      };
+  const handleAddStory = (e) => {
+    e.preventDefault();
+    saveStory(false);
+  };
 
+  const handleAddToDraft = (e) => {
+    e.preventDefault();
+    saveStory(true);
+  };
 
   const handleTitleKeyDown = (e) => {
     if (e.key === "Enter") {
@@ -90,7 +89,7 @@ const AddStory = () => {
   };
 
   const confirmBack = () => {
-      saveStory(true);
+    saveStory(true);
     setShowAlert(false);
     setIsBackConfirmation(false);
     navigate("/home");
@@ -123,6 +122,8 @@ const AddStory = () => {
     borderRadius: "5px",
     cursor: "pointer",
     fontFamily: "Georgia, 'Times New Roman', serif",
+    width: "100%",
+    maxWidth: "200px",
   };
 
   return (
@@ -227,6 +228,7 @@ const AddStory = () => {
         <div
           style={{
             display: "flex",
+            flexWrap: "wrap",
             gap: "10px",
             marginTop: "20px",
             justifyContent: "flex-start",
@@ -235,7 +237,7 @@ const AddStory = () => {
           <button type="button" onClick={handleAddStory} style={commonButtonStyle}>
             Submit Story
           </button>
-            <button type="button" onClick={handleAddToDraft} style={commonButtonStyle}>
+          <button type="button" onClick={handleAddToDraft} style={commonButtonStyle}>
             Save to Draft
           </button>
           <button
@@ -251,82 +253,127 @@ const AddStory = () => {
         </div>
       </form>
       {showAlert && (
-        <div
-          style={{
-            position: "fixed",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            backgroundColor: "white",
-            padding: "20px",
-            borderRadius: "8px",
-            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-            zIndex: 1000,
-            textAlign: "center",
-          }}
-        >
-          <p style={{ fontSize: "1.2rem", marginBottom: "20px" }}>
-            {isBackConfirmation
-              ? "Do you want to save the story to drafts before leaving?"
-              : "Select tags for your story:"}
-          </p>
-          {!isBackConfirmation &&
-            Object.keys(selectedTags).map((tag) => (
-              tag !== "isDraft" && (
-                <label
-                  key={tag}
-                  style={{ display: "block", marginBottom: "10px" }}
-                >
-                  <input
-                    type="checkbox"
-                    name={tag}
-                    checked={selectedTags[tag]}
-                    onChange={handleTagChange}
-                  />
-                  {tag.replace("is", "")}
-                </label>
-              )
-            ))}
-          <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
-              {isBackConfirmation ? (
-                <>
-                    <button
-                      onClick={confirmBack}
-                      style={commonButtonStyle}
-                    >
-                      Save Draft
-                    </button>
-                    <button
-                      onClick={cancelBack}
-                      style={{
-                        ...commonButtonStyle,
-                        backgroundColor: "#f44336",
-                      }}
-                    >
-                      Discard
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button onClick={handleSaveTags} style={commonButtonStyle}>
-                      Save Tags
-                    </button>
-                    <button
-                      onClick={cancelBack}
-                      style={{
-                        ...commonButtonStyle,
-                        backgroundColor: "#f44336",
-                      }}
-                    >
-                      Cancel
-                    </button>
-                  </>
-              )}
-          </div>
-        </div>
+  <div
+    style={{
+      position: "fixed",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      backgroundColor: "#fff",
+      padding: "25px",
+      borderRadius: "12px",
+      boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+      zIndex: 1000,
+      textAlign: "center",
+      width: "90%",
+      maxWidth: "450px",
+    }}
+  >
+    <p
+      style={{
+        fontSize: "1.4rem",
+        fontWeight: "bold",
+        marginBottom: "15px",
+        color: "#001a33",
+      }}
+    >
+      {isBackConfirmation
+        ? "Save story before leaving?"
+        : "Select Tags for Your Story"}
+    </p>
+
+    {!isBackConfirmation && (
+  <div
+    style={{
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))",
+      gap: "10px",
+      justifyContent: "center",
+      padding: "10px",
+    }}
+  >
+    {Object.keys(selectedTags).map(
+      (tag) =>
+        tag !== "isDraft" && (
+          <label
+            key={tag}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "5px",
+              cursor: "pointer",
+              fontSize: "1rem",
+              color: "#001a33",
+              textTransform: "capitalize",
+            }}
+          >
+            <input
+              type="checkbox"
+              name={tag}
+              checked={selectedTags[tag]}
+              onChange={handleTagChange}
+              style={{
+                width: "18px",
+                height: "18px",
+                accentColor: "#001a33",
+                cursor: "pointer",
+              }}
+            />
+            {tag.replace("is", "")}
+          </label>
+        )
+    )}
+  </div>
+)}
+
+
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        gap: "10px",
+        marginTop: "20px",
+      }}
+    >
+      {isBackConfirmation ? (
+        <>
+          <button onClick={confirmBack} style={commonButtonStyle}>
+            Save Draft
+          </button>
+          <button
+            onClick={cancelBack}
+            style={{
+              ...commonButtonStyle,
+              backgroundColor: "#f44336",
+            }}
+          >
+            Discard
+          </button>
+        </>
+      ) : (
+        <>
+          <button onClick={handleSaveTags} style={commonButtonStyle}>
+            Save Tags
+          </button>
+          <button
+            onClick={cancelBack}
+            style={{
+              ...commonButtonStyle,
+              backgroundColor: "#f44336",
+            }}
+          >
+            Cancel
+          </button>
+        </>
       )}
     </div>
+  </div>
+)}
+
+    </div>
   );
+  
+  
 };
 
 export default AddStory;

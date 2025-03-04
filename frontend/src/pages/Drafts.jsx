@@ -121,15 +121,13 @@ const Draft = () => {
         setFilteredDrafts(drafts);
     };
 
-
-
     return (
-        <div style={{ ...styles.container, backgroundColor: "#ffffff", minHeight: "100vh" }}>
-            <div style={styles.sidebar}>
+        <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "#ffffff" }}>
+            <div style={{ ...styles.sidebar, minWidth: "200px" }}>
                 <NavBar />
             </div>
 
-            <div style={styles.content}>
+            <div style={{ flex: 1, padding: "20px", overflow: "auto" }}>
                 <div style={styles.header}>
                     <h2 style={styles.h2}>Your Drafts</h2>
 
