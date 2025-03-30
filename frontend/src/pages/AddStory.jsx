@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import NavBar from "../components/NavBar";
+import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 
 const AddStory = () => {
   const [title, setTitle] = useState("");
@@ -25,41 +26,67 @@ const AddStory = () => {
   const navigate = useNavigate();
   const storyRef = useRef(null);
 
+  // Speech recognition setup
+  const {
+    transcript,
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition,
+  } = useSpeechRecognition();
+  const [recordingStatus, setRecordingStatus] = useState("");
+  const [isBrave, setIsBrave] = useState(false);
+  const [lastTranscript, setLastTranscript] = useState(""); // Track previous transcript
+
+  // Detect Brave and set initial date
   useEffect(() => {
+    const userAgent = navigator.userAgent;
+    const isBraveBrowser =
+      userAgent.includes("Chrome") && navigator.brave?.isBrave?.name === "isBrave";
+    setIsBrave(isBraveBrowser);
+
     const date = new Date();
     setCurrentDate(date.toLocaleDateString());
-  }, []);
+
+    if (isBraveBrowser || !browserSupportsSpeechRecognition) {
+      setRecordingStatus("Speech recognition is not supported in this browser. Use Chrome instead.");
+    }
+  }, [browserSupportsSpeechRecognition]);
+
+  // Live transcript update in textarea
+  useEffect(() => {
+    if (listening && !isBrave && browserSupportsSpeechRecognition && transcript) {
+      const newWords = transcript.slice(lastTranscript.length).trim();
+      if (newWords) {
+        setContent((prevContent) => prevContent + (prevContent ? " " : "") + newWords);
+        setLastTranscript(transcript);
+      }
+    }
+  }, [transcript, listening, isBrave, browserSupportsSpeechRecognition]);
+
+  // Reset transcript when recording stops
+  useEffect(() => {
+    if (!listening && !isBrave && browserSupportsSpeechRecognition) {
+      setLastTranscript("");
+      resetTranscript();
+      setRecordingStatus("Recording stopped.");
+    }
+  }, [listening, isBrave, browserSupportsSpeechRecognition]);
 
   const saveStory = async (isDraft) => {
     const token = localStorage.getItem("token");
-
     if (!token) {
       console.error("No token found. Please log in.");
       return;
     }
 
-    const storyData = {
-      title,
-      content,
-      isDraft,
-      ...selectedTags,
-    };
-
+    const storyData = { title, content, isDraft, ...selectedTags };
     try {
       const response = await axios.post(
         "https://digitaldiary-vkw0.onrender.com/api/story/add",
         storyData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      console.log(
-        isDraft ? "Story saved to drafts" : "Story added successfully:",
-        response.data
-      );
+      console.log(isDraft ? "Story saved to drafts" : "Story added successfully:", response.data);
       navigate("/home");
     } catch (error) {
       console.error("Error saving story:", error.response?.data || error.message);
@@ -102,14 +129,34 @@ const AddStory = () => {
 
   const handleTagChange = (e) => {
     const { name, checked } = e.target;
-    setSelectedTags((prevState) => ({
-      ...prevState,
-      [name]: checked,
-    }));
+    setSelectedTags((prevState) => ({ ...prevState, [name]: checked }));
   };
 
   const handleSaveTags = () => {
     setShowAlert(false);
+  };
+
+  // Speech recording handlers
+  const startRecording = async () => {
+    if (isBrave || !browserSupportsSpeechRecognition) {
+      setRecordingStatus("Speech recognition is not supported in this browser. Use Chrome instead.");
+      return;
+    }
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      SpeechRecognition.startListening({
+        continuous: true,
+        interimResults: true,
+        language: "en-IN", // Set to Indian English
+      });
+      setRecordingStatus("Recording... Speak your story.");
+    } catch (error) {
+      setRecordingStatus("Microphone access denied. Check permissions.");
+    }
+  };
+
+  const stopRecording = () => {
+    SpeechRecognition.stopListening();
   };
 
   const commonButtonStyle = {
@@ -250,130 +297,144 @@ const AddStory = () => {
           <button type="button" onClick={handleBackClick} style={commonButtonStyle}>
             Back
           </button>
+          <button
+            type="button"
+            onClick={listening ? stopRecording : startRecording}
+            disabled={isBrave || !browserSupportsSpeechRecognition}
+            style={{
+              ...commonButtonStyle,
+              backgroundColor: listening ? "#f44336" : "#4CAF50",
+              opacity: (isBrave || !browserSupportsSpeechRecognition) && !listening ? 0.5 : 1,
+              cursor: (isBrave || !browserSupportsSpeechRecognition) && !listening ? "not-allowed" : "pointer",
+            }}
+          >
+            {listening ? "Stop Recording" : "Record Story"}
+          </button>
         </div>
+        {recordingStatus && (
+          <p
+            style={{
+              marginTop: "10px",
+              color: recordingStatus.includes("denied") || recordingStatus.includes("supported") ? "red" : "#001a33",
+            }}
+          >
+            {recordingStatus}
+          </p>
+        )}
       </form>
-      {showAlert && (
-  <div
-    style={{
-      position: "fixed",
-      top: "50%",
-      left: "50%",
-      transform: "translate(-50%, -50%)",
-      backgroundColor: "#fff",
-      padding: "25px",
-      borderRadius: "12px",
-      boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
-      zIndex: 1000,
-      textAlign: "center",
-      width: "90%",
-      maxWidth: "450px",
-    }}
-  >
-    <p
-      style={{
-        fontSize: "1.4rem",
-        fontWeight: "bold",
-        marginBottom: "15px",
-        color: "#001a33",
-      }}
-    >
-      {isBackConfirmation
-        ? "Save story before leaving?"
-        : "Select Tags for Your Story"}
-    </p>
 
-    {!isBackConfirmation && (
-  <div
-    style={{
-      display: "grid",
-      gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))",
-      gap: "10px",
-      justifyContent: "center",
-      padding: "10px",
-    }}
-  >
-    {Object.keys(selectedTags).map(
-      (tag) =>
-        tag !== "isDraft" && (
-          <label
-            key={tag}
+      {showAlert && (
+        <div
+          style={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            backgroundColor: "#fff",
+            padding: "25px",
+            borderRadius: "12px",
+            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+            zIndex: 1000,
+            textAlign: "center",
+            width: "90%",
+            maxWidth: "450px",
+          }}
+        >
+          <p
+            style={{
+              fontSize: "1.4rem",
+              fontWeight: "bold",
+              marginBottom: "15px",
+              color: "#001a33",
+            }}
+          >
+            {isBackConfirmation
+              ? "Save story before leaving?"
+              : "Select Tags for Your Story"}
+          </p>
+
+          {!isBackConfirmation && (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))",
+                gap: "10px",
+                justifyContent: "center",
+                padding: "10px",
+              }}
+            >
+              {Object.keys(selectedTags).map(
+                (tag) =>
+                  tag !== "isDraft" && (
+                    <label
+                      key={tag}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "5px",
+                        cursor: "pointer",
+                        fontSize: "1rem",
+                        color: "#001a33",
+                        textTransform: "capitalize",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        name={tag}
+                        checked={selectedTags[tag]}
+                        onChange={handleTagChange}
+                        style={{
+                          width: "18px",
+                          height: "18px",
+                          accentColor: "#001a33",
+                          cursor: "pointer",
+                        }}
+                      />
+                      {tag.replace("is", "")}
+                    </label>
+                  )
+              )}
+            </div>
+          )}
+
+          <div
             style={{
               display: "flex",
-              alignItems: "center",
-              gap: "5px",
-              cursor: "pointer",
-              fontSize: "1rem",
-              color: "#001a33",
-              textTransform: "capitalize",
+              justifyContent: "center",
+              gap: "10px",
+              marginTop: "20px",
             }}
           >
-            <input
-              type="checkbox"
-              name={tag}
-              checked={selectedTags[tag]}
-              onChange={handleTagChange}
-              style={{
-                width: "18px",
-                height: "18px",
-                accentColor: "#001a33",
-                cursor: "pointer",
-              }}
-            />
-            {tag.replace("is", "")}
-          </label>
-        )
-    )}
-  </div>
-)}
-
-
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        gap: "10px",
-        marginTop: "20px",
-      }}
-    >
-      {isBackConfirmation ? (
-        <>
-          <button onClick={confirmBack} style={commonButtonStyle}>
-            Save Draft
-          </button>
-          <button
-            onClick={cancelBack}
-            style={{
-              ...commonButtonStyle,
-              backgroundColor: "#f44336",
-            }}
-          >
-            Discard
-          </button>
-        </>
-      ) : (
-        <>
-          <button onClick={handleSaveTags} style={commonButtonStyle}>
-            Save Tags
-          </button>
-          <button
-            onClick={cancelBack}
-            style={{
-              ...commonButtonStyle,
-              backgroundColor: "#f44336",
-            }}
-          >
-            Cancel
-          </button>
-        </>
+            {isBackConfirmation ? (
+              <>
+                <button onClick={confirmBack} style={commonButtonStyle}>
+                  Save Draft
+                </button>
+                <button
+                  onClick={cancelBack}
+                  style={{ ...commonButtonStyle, backgroundColor: "#f44336" }}
+                >
+                  Discard
+                </button>
+              </>
+            ) : (
+              <>
+                <button onClick={handleSaveTags} style={commonButtonStyle}>
+                  Save Tags
+                </button>
+                <button
+                  onClick={cancelBack}
+                  style={{ ...commonButtonStyle, backgroundColor: "#f44336" }}
+                >
+                  Cancel
+                </button>
+              </>
+            )}
+          </div>
+        </div>
       )}
     </div>
-  </div>
-)}
-
-    </div>
   );
-  
-  
 };
 
 export default AddStory;
