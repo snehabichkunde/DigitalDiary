@@ -3,6 +3,7 @@ import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import NavBar from "../components/NavBar";
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
+import "./AddStory.css"; 
 
 const StoryDetail = () => {
   const { id } = useParams();
@@ -23,7 +24,6 @@ const StoryDetail = () => {
   } = useSpeechRecognition();
   const [recordingStatus, setRecordingStatus] = useState("");
   const [isBrave, setIsBrave] = useState(false);
-  const [lastTranscript, setLastTranscript] = useState(""); // Track previous transcript
 
   useEffect(() => {
     const fetchStory = async () => {
@@ -55,29 +55,9 @@ const StoryDetail = () => {
       userAgent.includes("Chrome") && navigator.brave?.isBrave?.name === "isBrave";
     setIsBrave(isBraveBrowser);
     if (isBraveBrowser || !browserSupportsSpeechRecognition) {
-      setRecordingStatus("Speech recognition is not supported in this browser. ");
+      setRecordingStatus("Speech recognition is not supported in this browser.");
     }
   }, [id, browserSupportsSpeechRecognition]);
-
-  useEffect(() => {
-    if (listening && !isBrave && browserSupportsSpeechRecognition && transcript && isEditing) {
-      const newWords = transcript.slice(lastTranscript.length).trim();
-      if (newWords) {
-        setEditedContent((prevContent) => prevContent + (prevContent ? " " : "") + newWords);
-        setLastTranscript(transcript);
-        setIsUnsaved(true);
-      }
-    }
-  }, [transcript, listening, isBrave, browserSupportsSpeechRecognition, isEditing]);
-
-  // Reset transcript when recording stops
-  useEffect(() => {
-    if (!listening && !isBrave && browserSupportsSpeechRecognition) {
-      setLastTranscript("");
-      resetTranscript();
-      setRecordingStatus("Recording stopped.");
-    }
-  }, [listening, isBrave, browserSupportsSpeechRecognition]);
 
   const handleDelete = async () => {
     try {
@@ -164,7 +144,7 @@ const StoryDetail = () => {
         {
           content: editedContent,
           ...editedTags,
-          isDraft: story.isDraft, // Preserve draft status
+          isDraft: story.isDraft,
         }
       );
       setStory((prevStory) => ({
@@ -190,7 +170,6 @@ const StoryDetail = () => {
     setIsUnsaved(true);
   };
 
-  // Speech recording handlers
   const startRecording = async () => {
     if (isBrave || !browserSupportsSpeechRecognition) {
       setRecordingStatus("Speech recognition is not supported in this browser. Use Chrome instead.");
@@ -204,8 +183,7 @@ const StoryDetail = () => {
       await navigator.mediaDevices.getUserMedia({ audio: true });
       SpeechRecognition.startListening({
         continuous: true,
-        interimResults: true,
-        language: "en-IN", 
+        language: "en-IN",
       });
       setRecordingStatus("Recording... Speak your story.");
     } catch (error) {
@@ -213,8 +191,28 @@ const StoryDetail = () => {
     }
   };
 
+  const pauseRecording = () => {
+    SpeechRecognition.stopListening();
+    setEditedContent((prev) => (prev ? `${prev} ${transcript}` : transcript));
+    setIsUnsaved(true);
+    setRecordingStatus("Recording paused. Resume or stop to continue.");
+    resetTranscript();
+  };
+
+  const resumeRecording = () => {
+    SpeechRecognition.startListening({
+      continuous: true,
+      language: "en-IN",
+    });
+    setRecordingStatus("Recording resumed... Speak your story.");
+  };
+
   const stopRecording = () => {
     SpeechRecognition.stopListening();
+    setEditedContent((prev) => (prev ? `${prev} ${transcript}` : transcript));
+    setIsUnsaved(true);
+    setRecordingStatus("Recording stopped. Your speech has been added.");
+    resetTranscript();
   };
 
   useEffect(() => {
@@ -236,306 +234,146 @@ const StoryDetail = () => {
     return <p>Loading...</p>;
   }
 
-  const commonButtonStyle = {
-    backgroundColor: "#001a33",
-    color: "white",
-    padding: "8px 16px",
-    fontSize: "1rem",
-    fontWeight: "bold",
-    border: "none",
-    borderRadius: "5px",
-    cursor: "pointer",
-    fontFamily: "Georgia, 'Times New Roman', serif",
-  };
-
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        minHeight: "100vh",
-        backgroundColor: "#fdf4dc",
-        fontFamily: "Georgia, 'Times New Roman', serif",
-        padding: "20px",
-        position: "relative",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        marginLeft: "250px",
-        width: "calc(100% - 250px)",
-      }}
-    >
+    <div className="add-story-container">
       <NavBar />
-      <div
-        style={{
-          position: "absolute",
-          top: "20px",
-          right: "20px",
-          fontSize: "1rem",
-          fontFamily: "Georgia, 'Times New Roman', serif",
-          color: "#001a33",
-          textShadow: "2px 2px 8px rgba(0, 0, 0, 0.5)",
-        }}
-      >
+      <div className="date-display">
         {new Date(story.createdAt).toLocaleDateString("en-US")}
       </div>
 
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          marginBottom: "10px",
-        }}
-      >
-        <label
-          style={{
-            fontSize: "1.2rem",
-            fontWeight: "bold",
-            color: "#001a33",
-            textShadow: "2px 2px 8px rgba(0, 0, 0, 0.5)",
-            marginRight: "10px",
-          }}
-        >
-          Title:
-        </label>
-        <h1
-          style={{
-            fontSize: "1.5rem",
-            color: "#001a33",
-            textShadow: "2px 2px 8px rgba(0, 0, 0, 0.5)",
-          }}
-        >
+      <div className="title-section">
+        <label className="title-label">Title:</label>
+        <h1 className="title-input" style={{ flex: "none", border: "none" }}>
           {story.title}
         </h1>
       </div>
 
-      <div
-        style={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <p
-          style={{
-            fontSize: "1.2rem",
-            fontFamily: "Georgia, 'Times New Roman', serif",
-            color: "#001a33",
-            lineHeight: "24px",
-            marginTop: "10px",
-            textShadow: "2px 2px 8px rgba(0, 0, 0, 0.5)",
-            whiteSpace: "pre-wrap",
-          }}
-        >
+      <div className="story-form">
+        <div className="content-container">
           {isEditing ? (
             <textarea
-              value={editedContent}
+              value={listening ? `${editedContent} ${transcript}` : editedContent}
               onChange={(e) => {
                 setEditedContent(e.target.value);
                 setIsUnsaved(true);
               }}
-              rows="10"
-              style={{
-                width: "100%",
-                fontSize: "1.2rem",
-                padding: "10px",
-                fontFamily: "Georgia, 'Times New Roman', serif",
-                backgroundColor: "#fdf4dc",
-                borderRadius: "5px",
-                border: "none",
-                color: "#001a33",
-                boxSizing: "border-box",
-                whiteSpace: "pre-wrap",
-                outline: "none",
-              }}
+              className="content-textarea"
             />
           ) : (
-            story.content
+            <p className="content-textarea" style={{ border: "none" }}>
+              {story.content}
+            </p>
           )}
-        </p>
-      </div>
+          {recordingStatus && isEditing && (
+            <p className={`recording-status ${recordingStatus.includes("denied") || recordingStatus.includes("supported") ? "error-text" : ""}`}>
+              {recordingStatus}
+            </p>
+          )}
+          {listening && (
+            <div className="recording-indicator">
+              <span>🎙️ Recording in progress...</span>
+              <div className="recording-pulse-dot" />
+            </div>
+          )}
+        </div>
 
-      <div
-        style={{
-          position: "absolute",
-          bottom: "20px",
-          left: "20px",
-          display: "flex",
-          gap: "20px",
-        }}
-      >
-        <button onClick={handleBackClick} style={commonButtonStyle}>
-          Back
-        </button>
-        <button onClick={handleViewTags} style={commonButtonStyle}>
-          View/Edit Tags
-        </button>
-      </div>
-
-      <div
-        style={{
-          position: "absolute",
-          bottom: "20px",
-          right: "20px",
-          display: "flex",
-          gap: "20px",
-        }}
-      >
-        {isEditing ? (
-          <>
-            <button onClick={handleSubmit} style={commonButtonStyle}>
-              Submit
-            </button>
-            <button
-              onClick={listening ? stopRecording : startRecording}
-              disabled={isBrave || !browserSupportsSpeechRecognition}
-              style={{
-                ...commonButtonStyle,
-                backgroundColor: listening ? "#f44336" : "#4CAF50",
-                opacity: (isBrave || !browserSupportsSpeechRecognition) && !listening ? 0.5 : 1,
-                cursor: (isBrave || !browserSupportsSpeechRecognition) && !listening ? "not-allowed" : "pointer",
-              }}
-            >
-              {listening ? "Stop Recording" : "Record"}
-            </button>
-          </>
-        ) : (
-          <>
-            <button
-              onClick={() => {
-                setIsEditing(true);
-              }}
-              style={commonButtonStyle}
-            >
-              Edit
-            </button>
-            <button
-              onClick={handleDelete}
-              style={{
-                ...commonButtonStyle,
-                backgroundColor: "red",
-              }}
-            >
-              Delete
-            </button>
-          </>
-        )}
-      </div>
-
-      {recordingStatus && isEditing && (
-        <p
-          style={{
-            marginTop: "10px",
-            color: recordingStatus.includes("denied") || recordingStatus.includes("supported") ? "red" : "#001a33",
-            position: "absolute",
-            bottom: "60px",
-            right: "20px",
-          }}
-        >
-          {recordingStatus}
-        </p>
-      )}
-
-      {showAlert && (
-        <div
-          style={{
-            position: "fixed",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            backgroundColor: "white",
-            padding: "20px",
-            borderRadius: "8px",
-            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-            zIndex: 1000,
-            textAlign: "center",
-            width: "90%",
-            maxWidth: "450px",
-          }}
-        >
-          {isViewingTags ? (
+        <div className="button-container" style={{ position: "absolute", bottom: "20px", left: "20px", right: "20px", justifyContent: "center" }}>
+          <button onClick={handleBackClick} className="primary-button">
+            Back
+          </button>
+          <button onClick={handleViewTags} className="primary-button">
+            View/Edit Tags
+          </button>
+          {isEditing ? (
             <>
-              <p style={{ fontSize: "1.2rem", marginBottom: "20px" }}>
-                Edit Tags
-              </p>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))",
-                  gap: "10px",
-                  justifyContent: "center",
-                  padding: "10px",
-                }}
-              >
-                {Object.keys(editedTags).map((tag) => (
-                  <label
-                    key={tag}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "5px",
-                      cursor: "pointer",
-                      fontSize: "1rem",
-                      color: "#001a33",
-                      textTransform: "capitalize",
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      name={tag}
-                      checked={editedTags[tag]}
-                      onChange={handleTagChange}
-                      style={{
-                        width: "18px",
-                        height: "18px",
-                        accentColor: "#001a33",
-                        cursor: "pointer",
-                      }}
-                    />
-                    {tag.replace("is", "")}
-                  </label>
-                ))}
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  gap: "10px",
-                  marginTop: "20px",
-                }}
-              >
-                <button onClick={handleSaveTags} style={commonButtonStyle}>
-                  Save Tags
+              <button onClick={handleSubmit} className="primary-button">
+                Submit
+              </button>
+              {!listening ? (
+                <button
+                  onClick={startRecording}
+                  disabled={isBrave || !browserSupportsSpeechRecognition}
+                  className="primary-button"
+                  style={{
+                    backgroundColor: isBrave || !browserSupportsSpeechRecognition ? "#cccccc" : "#001a33",
+                  }}
+                >
+                  Record Story
                 </button>
-                <button onClick={closeTagModal} style={commonButtonStyle}>
-                  Close
-                </button>
-              </div>
+              ) : (
+                <>
+                  <button onClick={pauseRecording} className="primary-button" style={{ backgroundColor: "#FFA500" }}>
+                    Pause Recording
+                  </button>
+                  <button onClick={resumeRecording} className="primary-button" style={{ backgroundColor: "#2196F3" }}>
+                    Resume Recording
+                  </button>
+                  <button onClick={stopRecording} className="recording-button">
+                    Stop Recording
+                  </button>
+                </>
+              )}
             </>
           ) : (
             <>
-              <p style={{ fontSize: "1.2rem", marginBottom: "20px" }}>
-                You have unsaved changes. Would you like to save them as a draft before leaving?
-              </p>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  gap: "10px",
-                }}
-              >
-                <button onClick={saveAsDraft} style={commonButtonStyle}>
-                  Save as Draft
-                </button>
-                <button onClick={confirmBack} style={commonButtonStyle}>
-                  Don't Save
-                </button>
-                <button onClick={cancelBack} style={commonButtonStyle}>
-                  Cancel
-                </button>
-              </div>
+              <button onClick={() => setIsEditing(true)} className="primary-button">
+                Edit
+              </button>
+              <button onClick={handleDelete} className="secondary-button">
+                Delete
+              </button>
             </>
           )}
+        </div>
+      </div>
+
+      {showAlert && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            {isViewingTags ? (
+              <>
+                <h2 className="modal-title">Edit Tags</h2>
+                <div className="tags-grid">
+                  {Object.keys(editedTags).map((tag) => (
+                    <label key={tag} className="tag-label">
+                      <input
+                        type="checkbox"
+                        name={tag}
+                        checked={editedTags[tag]}
+                        onChange={handleTagChange}
+                        className="tag-checkbox"
+                      />
+                      <span>{tag.replace("is", "")}</span>
+                    </label>
+                  ))}
+                </div>
+                <div className="modal-buttons">
+                  <button onClick={handleSaveTags} className="primary-button">
+                    Save Tags
+                  </button>
+                  <button onClick={closeTagModal} className="primary-button">
+                    Close
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 className="modal-title">Save before leaving?</h2>
+                <p>You have unsaved changes. Would you like to save them as a draft before leaving?</p>
+                <div className="modal-buttons">
+                  <button onClick={saveAsDraft} className="primary-button">
+                    Save as Draft
+                  </button>
+                  <button onClick={confirmBack} className="secondary-button">
+                    Discard
+                  </button>
+                  <button onClick={cancelBack} className="tertiary-button">
+                    Cancel
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       )}
     </div>

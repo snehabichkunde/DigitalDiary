@@ -1,16 +1,15 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useBeforeUnload } from "react-router-dom";
 import NavBar from "../components/NavBar";
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
+import "./AddStory.css"; 
 
 const AddStory = () => {
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [currentDate, setCurrentDate] = useState("");
-  const [showAlert, setShowAlert] = useState(false);
-  const [isBackConfirmation, setIsBackConfirmation] = useState(false);
-  const [selectedTags, setSelectedTags] = useState({
+  const [state, setState] = useState({
+    // Story data
+    title: "",
+    content: "",
     isFavorite: false,
     isPoem: false,
     isBlog: false,
@@ -22,414 +21,510 @@ const AddStory = () => {
     isReminder: false,
     isHappy: false,
     isSad: false,
+    
+    // UI state
+    currentDate: "",
+    showModal: false,
+    modalType: "",
+    errorMessage: "",
+    recordingStatus: "",
+    isLoading: false,
+    hasChanges: false
   });
+  
   const navigate = useNavigate();
   const storyRef = useRef(null);
+  const titleRef = useRef(null);
 
   // Speech recognition setup
   const {
     transcript,
     listening,
     resetTranscript,
-    browserSupportsSpeechRecognition,
+    browserSupportsSpeechRecognition
   } = useSpeechRecognition();
-  const [recordingStatus, setRecordingStatus] = useState("");
-  const [isBrave, setIsBrave] = useState(false);
-  const [lastTranscript, setLastTranscript] = useState(""); // Track previous transcript
 
-  // Detect Brave and set initial date
+  // Set initial date
   useEffect(() => {
-    const userAgent = navigator.userAgent;
-    const isBraveBrowser =
-      userAgent.includes("Chrome") && navigator.brave?.isBrave?.name === "isBrave";
-    setIsBrave(isBraveBrowser);
-
     const date = new Date();
-    setCurrentDate(date.toLocaleDateString());
-
-    if (isBraveBrowser || !browserSupportsSpeechRecognition) {
-      setRecordingStatus("Speech recognition is not supported in this browser. Use Chrome instead.");
-    }
-  }, [browserSupportsSpeechRecognition]);
-
-  // Live transcript update in textarea
-  useEffect(() => {
-    if (listening && !isBrave && browserSupportsSpeechRecognition && transcript) {
-      const newWords = transcript.slice(lastTranscript.length).trim();
-      if (newWords) {
-        setContent((prevContent) => prevContent + (prevContent ? " " : "") + newWords);
-        setLastTranscript(transcript);
+    setState(prev => ({...prev, currentDate: date.toLocaleDateString()}));
+    
+    // Load draft from localStorage if available
+    const savedDraft = localStorage.getItem("storyDraft");
+    if (savedDraft) {
+      try {
+        const parsedDraft = JSON.parse(savedDraft);
+        setState(prev => ({...prev, ...parsedDraft, hasChanges: false}));
+      } catch (e) {
+        // If parsing fails, just continue with empty form
       }
     }
-  }, [transcript, listening, isBrave, browserSupportsSpeechRecognition]);
-
-  // Reset transcript when recording stops
-  useEffect(() => {
-    if (!listening && !isBrave && browserSupportsSpeechRecognition) {
-      setLastTranscript("");
-      resetTranscript();
-      setRecordingStatus("Recording stopped.");
+    
+    // Focus on title input when component mounts
+    if (titleRef.current) {
+      titleRef.current.focus();
     }
-  }, [listening, isBrave, browserSupportsSpeechRecognition]);
+  }, []);
 
-  const saveStory = async (isDraft) => {
+  // Auto-save draft to localStorage
+  useEffect(() => {
+    if (state.hasChanges) {
+      const draftData = {
+        title: state.title,
+        content: state.content,
+        isFavorite: state.isFavorite,
+        isPoem: state.isPoem,
+        isBlog: state.isBlog,
+        isNotes: state.isNotes,
+        isJournal: state.isJournal,
+        isPersonal: state.isPersonal,
+        isTravel: state.isTravel,
+        isReflective: state.isReflective,
+        isReminder: state.isReminder,
+        isHappy: state.isHappy,
+        isSad: state.isSad,
+      };
+      
+      localStorage.setItem("storyDraft", JSON.stringify(draftData));
+    }
+  }, [state.hasChanges, state.title, state.content, state.isFavorite, 
+      state.isPoem, state.isBlog, state.isNotes, state.isJournal, 
+      state.isPersonal, state.isTravel, state.isReflective, 
+      state.isReminder, state.isHappy, state.isSad]);
+
+  // Prevent accidental navigation when there are unsaved changes
+  useBeforeUnload(
+    useCallback(
+      (event) => {
+        if (state.hasChanges) {
+          event.preventDefault();
+          return (event.returnValue = 
+            "You have unsaved changes. Are you sure you want to leave?");
+        }
+      },
+      [state.hasChanges]
+    )
+  );
+
+  // API calls with improved error handling
+  const saveStory = useCallback(async (isDraft) => {
+    // Basic validation
+    if (!state.title.trim()) {
+      setState(prev => ({
+        ...prev, 
+        showModal: true, 
+        modalType: "error", 
+        errorMessage: "Please add a title for your story."
+      }));
+      return;
+    }
+
+    if (!state.content.trim()) {
+      setState(prev => ({
+        ...prev, 
+        showModal: true, 
+        modalType: "error", 
+        errorMessage: "Please add some content to your story."
+      }));
+      return;
+    }
+
     const token = localStorage.getItem("token");
     if (!token) {
-      console.error("No token found. Please log in.");
+      setState(prev => ({
+        ...prev, 
+        showModal: true, 
+        modalType: "error", 
+        errorMessage: "No authentication token found. Please log in again."
+      }));
       return;
     }
 
-    const storyData = { title, content, isDraft, ...selectedTags };
+    setState(prev => ({...prev, isLoading: true}));
+    
     try {
+      const storyPayload = {
+        title: state.title,
+        content: state.content,
+        isFavorite: state.isFavorite,
+        isPoem: state.isPoem,
+        isBlog: state.isBlog,
+        isNotes: state.isNotes,
+        isJournal: state.isJournal,
+        isPersonal: state.isPersonal,
+        isTravel: state.isTravel,
+        isReflective: state.isReflective,
+        isReminder: state.isReminder,
+        isHappy: state.isHappy,
+        isSad: state.isSad,
+        isDraft
+      };
+      
       const response = await axios.post(
         "https://digitaldiary-vkw0.onrender.com/api/story/add",
-        storyData,
+        storyPayload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log(isDraft ? "Story saved to drafts" : "Story added successfully:", response.data);
+      
+      // Clear draft from localStorage after successful save
+      localStorage.removeItem("storyDraft");
+      
       navigate("/home");
     } catch (error) {
-      console.error("Error saving story:", error.response?.data || error.message);
+      const errorMsg = error.response?.data?.message || 
+        "Failed to save your story. Please try again.";
+      setState(prev => ({
+        ...prev, 
+        showModal: true, 
+        modalType: "error", 
+        errorMessage: errorMsg
+      }));
+    } finally {
+      setState(prev => ({...prev, isLoading: false}));
     }
-  };
+  }, [state, navigate]);
 
-  const handleAddStory = (e) => {
-    e.preventDefault();
-    saveStory(false);
-  };
+  // Debounced input change handler
+  const handleInputChange = useCallback((e) => {
+    const { name, value, type, checked } = e.target;
+    const newValue = type === "checkbox" ? checked : value;
+    
+    setState(prev => ({
+      ...prev,
+      [name]: newValue,
+      hasChanges: true
+    }));
+  }, []);
 
-  const handleAddToDraft = (e) => {
-    e.preventDefault();
-    saveStory(true);
-  };
-
-  const handleTitleKeyDown = (e) => {
+  const handleTitleKeyDown = useCallback((e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      storyRef.current.focus();
+      if (storyRef.current) {
+        storyRef.current.focus();
+      }
     }
-  };
+  }, []);
 
-  const handleBackClick = () => {
-    setIsBackConfirmation(true);
-    setShowAlert(true);
-  };
+  const closeModal = useCallback(() => {
+    setState(prev => ({...prev, showModal: false, modalType: "", errorMessage: ""}));
+  }, []);
 
-  const confirmBack = () => {
-    saveStory(true);
-    setShowAlert(false);
-    setIsBackConfirmation(false);
-    navigate("/home");
-  };
-
-  const cancelBack = () => {
-    setShowAlert(false);
-    setIsBackConfirmation(false);
-  };
-
-  const handleTagChange = (e) => {
-    const { name, checked } = e.target;
-    setSelectedTags((prevState) => ({ ...prevState, [name]: checked }));
-  };
-
-  const handleSaveTags = () => {
-    setShowAlert(false);
-  };
-
-  // Speech recording handlers
-  const startRecording = async () => {
-    if (isBrave || !browserSupportsSpeechRecognition) {
-      setRecordingStatus("Speech recognition is not supported in this browser. Use Chrome instead.");
+  // Optimized speech recording handlers
+  const startRecording = useCallback(() => {
+    if (!browserSupportsSpeechRecognition) {
+      setState(prev => ({
+        ...prev, 
+        recordingStatus: "Speech recognition is not supported in this browser. Use Chrome instead."
+      }));
       return;
     }
-    try {
-      await navigator.mediaDevices.getUserMedia({ audio: true });
-      SpeechRecognition.startListening({
-        continuous: true,
-        interimResults: true,
-        language: "en-IN", // Set to Indian English
-      });
-      setRecordingStatus("Recording... Speak your story.");
-    } catch (error) {
-      setRecordingStatus("Microphone access denied. Check permissions.");
-    }
-  };
+    
+    SpeechRecognition.startListening({ 
+      continuous: true, 
+      language: 'en-IN' 
+    });
+    
+    setState(prev => ({
+      ...prev, 
+      recordingStatus: "Recording... Speak your story."
+    }));
+  }, [browserSupportsSpeechRecognition]);
 
-  const stopRecording = () => {
+  const pauseRecording = useCallback(() => {
     SpeechRecognition.stopListening();
-  };
+    setState(prev => ({
+      ...prev,
+      content: prev.content ? `${prev.content} ${transcript}` : transcript,
+      hasChanges: true,
+      recordingStatus: "Recording paused. Resume or stop to continue."
+    }));
+    resetTranscript();
+  }, [transcript]);
 
-  const commonButtonStyle = {
-    backgroundColor: "#001a33",
-    color: "white",
-    padding: "8px 16px",
-    fontSize: "1rem",
-    fontWeight: "bold",
-    border: "none",
-    borderRadius: "5px",
-    cursor: "pointer",
-    fontFamily: "Georgia, 'Times New Roman', serif",
-    width: "100%",
-    maxWidth: "200px",
-  };
+  const resumeRecording = useCallback(() => {
+    SpeechRecognition.startListening({ 
+      continuous: true, 
+      language: 'en-IN' 
+    });
+    setState(prev => ({
+      ...prev,
+      recordingStatus: "Recording resumed... Speak your story."
+    }));
+  }, []);
+
+  const stopRecording = useCallback(() => {
+    SpeechRecognition.stopListening();
+    setState(prev => ({
+      ...prev,
+      content: prev.content ? `${prev.content} ${transcript}` : transcript,
+      hasChanges: true,
+      recordingStatus: "Recording stopped. Your speech has been added to the story."
+    }));
+    resetTranscript();
+  }, [transcript]);
+
+  const confirmNavigateAway = useCallback(() => {
+    closeModal();
+    navigate("/home");
+  }, [closeModal, navigate]);
+
+  const handleSaveDraftAndLeave = useCallback(() => {
+    saveStory(true);
+    closeModal();
+  }, [saveStory, closeModal]);
+
+  // Handle browser speech recognition compatibility check
+  if (!browserSupportsSpeechRecognition) {
+    return (
+      <div className="add-story-container">
+        <NavBar />
+        <div className="browser-compatibility-message">
+          <h2>Browser Compatibility Issue</h2>
+          <p>
+            Speech recognition is not supported in this browser. 
+            Please use Chrome or another compatible browser.
+          </p>
+          <button
+            className="primary-button"
+            onClick={() => navigate("/home")}
+          >
+            Back to Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const { 
+    title, content, currentDate, showModal, modalType, 
+    errorMessage, recordingStatus, isLoading 
+  } = state;
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        minHeight: "100vh",
-        backgroundColor: "#fdf4dc",
-        fontFamily: "Georgia, 'Times New Roman', serif",
-        padding: "20px",
-        position: "relative",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        marginLeft: "250px",
-        width: "calc(100% - 250px)",
-      }}
-    >
+    <div className="add-story-container">
       <NavBar />
-      <div
-        style={{
-          position: "absolute",
-          top: "20px",
-          right: "20px",
-          fontSize: "1rem",
-          fontFamily: "Georgia, 'Times New Roman', serif",
-          color: "#001a33",
-          textShadow: "2px 2px 8px rgba(0, 0, 0, 0.5)",
-        }}
-      >
+      
+      <div className="date-display" aria-label="Current date">
         {currentDate}
       </div>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          marginBottom: "10px",
-        }}
-      >
-        <label
-          style={{
-            fontSize: "1.2rem",
-            fontWeight: "bold",
-            color: "#001a33",
-            textShadow: "2px 2px 8px rgba(0, 0, 0, 0.5)",
-            marginRight: "10px",
-          }}
-        >
+      
+      <div className="title-section">
+        <label htmlFor="story-title" className="title-label">
           Title:
         </label>
         <input
+          id="story-title"
+          ref={titleRef}
+          name="title"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={handleInputChange}
           onKeyDown={handleTitleKeyDown}
           placeholder="Write your title here..."
-          style={{
-            flex: 1,
-            border: "none",
-            outline: "none",
-            fontSize: "1.2rem",
-            fontFamily: "Georgia, 'Times New Roman', serif",
-            background: "transparent",
-            color: "#001a33",
-            lineHeight: "24px",
-            padding: "10px",
-            marginBottom: "10px",
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            textShadow: "2px 2px 8px rgba(0, 0, 0, 0.5)",
-          }}
+          className="title-input"
+          aria-label="Story title"
         />
       </div>
-      <form
-        style={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <textarea
-          ref={storyRef}
-          placeholder="Write your story here..."
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          style={{
-            flex: 1,
-            border: "none",
-            outline: "none",
-            fontSize: "1.2rem",
-            fontFamily: "Georgia, 'Times New Roman', serif",
-            background: "transparent",
-            color: "#001a33",
-            resize: "none",
-            lineHeight: "24px",
-            padding: "10px",
-            marginTop: "10px",
-            textShadow: "2px 2px 8px rgba(0, 0, 0, 0.5)",
-          }}
-        />
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "10px",
-            marginTop: "20px",
-            justifyContent: "flex-start",
-          }}
-        >
-          <button type="button" onClick={handleAddStory} style={commonButtonStyle}>
-            Submit Story
+      
+      <form className="story-form" onSubmit={(e) => e.preventDefault()}>
+        <div className="content-container">
+          <textarea
+            ref={storyRef}
+            name="content"
+            placeholder="Write your story here or use the Record Story button..."
+            value={listening ? `${content} ${transcript}` : content}
+            onChange={handleInputChange}
+            className="content-textarea"
+            aria-label="Story content"
+          />
+          
+          <div className="word-count">
+            {content ? content.trim().split(/\s+/).length : 0} words
+          </div>
+        </div>
+        
+        <div className="button-container">
+          <button 
+            type="button" 
+            onClick={() => saveStory(false)} 
+            className="primary-button"
+            disabled={isLoading}
+            aria-label="Submit story"
+          >
+            {isLoading ? "Submitting..." : "Submit Story"}
           </button>
-          <button type="button" onClick={handleAddToDraft} style={commonButtonStyle}>
-            Save to Draft
+          
+          <button 
+            type="button" 
+            onClick={() => saveStory(true)} 
+            className="primary-button"
+            disabled={isLoading}
+            aria-label="Save to draft"
+          >
+            {isLoading ? "Saving..." : "Save to Draft"}
           </button>
+          
           <button
             type="button"
-            onClick={() => setShowAlert(true)}
-            style={commonButtonStyle}
+            onClick={() => setState(prev => ({...prev, showModal: true, modalType: "tags"}))}
+            className="primary-button"
+            disabled={isLoading}
+            aria-label="Add tags"
           >
             Add Tags
           </button>
-          <button type="button" onClick={handleBackClick} style={commonButtonStyle}>
+          
+          <button 
+            type="button" 
+            onClick={() => setState(prev => ({...prev, showModal: true, modalType: "backConfirmation"}))} 
+            className="primary-button"
+            disabled={isLoading}
+            aria-label="Back to home"
+          >
             Back
           </button>
-          <button
-            type="button"
-            onClick={listening ? stopRecording : startRecording}
-            disabled={isBrave || !browserSupportsSpeechRecognition}
-            style={{
-              ...commonButtonStyle,
-              backgroundColor: listening ? "#f44336" : "#4CAF50",
-              opacity: (isBrave || !browserSupportsSpeechRecognition) && !listening ? 0.5 : 1,
-              cursor: (isBrave || !browserSupportsSpeechRecognition) && !listening ? "not-allowed" : "pointer",
-            }}
-          >
-            {listening ? "Stop Recording" : "Record Story"}
-          </button>
+          
+          {!listening ? (
+            <button
+              type="button"
+              onClick={startRecording}
+              className="primary-button"
+              disabled={isLoading}
+              aria-label="Start recording"
+            >
+              Record Story
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={pauseRecording}
+                className="primary-button"
+                disabled={isLoading}
+                aria-label="Pause recording"
+              >
+                Pause Recording
+              </button>
+              <button
+                type="button"
+                onClick={resumeRecording}
+                className="primary-button"
+                disabled={isLoading}
+                aria-label="Resume recording"
+              >
+                Resume Recording
+              </button>
+              <button
+                type="button"
+                onClick={stopRecording}
+                className="primary-button recording-button"
+                disabled={isLoading}
+                aria-label="Stop recording"
+              >
+                Stop Recording
+              </button>
+            </>
+          )}
         </div>
+        
         {recordingStatus && (
-          <p
-            style={{
-              marginTop: "10px",
-              color: recordingStatus.includes("denied") || recordingStatus.includes("supported") ? "red" : "#001a33",
-            }}
-          >
+          <p className={`recording-status ${recordingStatus.includes("not supported") ? "error-text" : ""}`}
+             aria-live="polite">
             {recordingStatus}
           </p>
         )}
+        
+        {listening && (
+          <div className="recording-indicator" role="status" aria-live="assertive">
+            <span>🎙️ Recording in progress...</span>
+            <div className="recording-pulse-dot" />
+          </div>
+        )}
       </form>
 
-      {showAlert && (
-        <div
-          style={{
-            position: "fixed",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            backgroundColor: "#fff",
-            padding: "25px",
-            borderRadius: "12px",
-            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
-            zIndex: 1000,
-            textAlign: "center",
-            width: "90%",
-            maxWidth: "450px",
-          }}
+      {/* Modal Dialog */}
+      {showModal && (
+        <div 
+          className="modal-overlay" 
+          onClick={closeModal}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
         >
-          <p
-            style={{
-              fontSize: "1.4rem",
-              fontWeight: "bold",
-              marginBottom: "15px",
-              color: "#001a33",
+          <div 
+            className="modal-content" 
+            onClick={e => e.stopPropagation()}
+            onKeyDown={e => {
+              if (e.key === 'Escape') closeModal();
             }}
+            tabIndex={0}
           >
-            {isBackConfirmation
-              ? "Save story before leaving?"
-              : "Select Tags for Your Story"}
-          </p>
+            <h2 className="modal-title" id="modal-title">
+              {modalType === "error" ? "Error" : 
+               modalType === "backConfirmation" ? "Save before leaving?" : 
+               "Select Tags for Your Story"}
+            </h2>
 
-          {!isBackConfirmation && (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))",
-                gap: "10px",
-                justifyContent: "center",
-                padding: "10px",
-              }}
-            >
-              {Object.keys(selectedTags).map(
-                (tag) =>
-                  tag !== "isDraft" && (
-                    <label
-                      key={tag}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "5px",
-                        cursor: "pointer",
-                        fontSize: "1rem",
-                        color: "#001a33",
-                        textTransform: "capitalize",
-                      }}
-                    >
+            {modalType === "error" && (
+              <p className="error-message">{errorMessage}</p>
+            )}
+
+            {modalType === "tags" && (
+              <div className="tags-grid" role="group" aria-label="Story tags">
+                {Object.keys(state)
+                  .filter(key => key.startsWith("is") && key !== "isLoading")
+                  .map(tag => (
+                    <label key={tag} className="tag-label">
                       <input
                         type="checkbox"
                         name={tag}
-                        checked={selectedTags[tag]}
-                        onChange={handleTagChange}
-                        style={{
-                          width: "18px",
-                          height: "18px",
-                          accentColor: "#001a33",
-                          cursor: "pointer",
-                        }}
+                        checked={state[tag]}
+                        onChange={handleInputChange}
+                        className="tag-checkbox"
+                        aria-label={tag.replace("is", "")}
                       />
-                      {tag.replace("is", "")}
+                      <span>{tag.replace("is", "")}</span>
                     </label>
-                  )
+                  ))}
+              </div>
+            )}
+
+            <div className="modal-buttons">
+              {modalType === "backConfirmation" ? (
+                <>
+                  <button 
+                    onClick={handleSaveDraftAndLeave} 
+                    className="primary-button"
+                  >
+                    Save Draft
+                  </button>
+                  <button
+                    onClick={confirmNavigateAway}
+                    className="secondary-button"
+                  >
+                    Discard
+                  </button>
+                  <button
+                    onClick={closeModal}
+                    className="tertiary-button"
+                  >
+                    Cancel
+                  </button>
+                </>
+              ) : modalType === "tags" ? (
+                <>
+                  <button onClick={closeModal} className="primary-button">
+                    Save Tags
+                  </button>
+                  <button onClick={closeModal} className="secondary-button">
+                    Cancel
+                  </button>
+                </>
+              ) : (
+                <button onClick={closeModal} className="primary-button">
+                  OK
+                </button>
               )}
             </div>
-          )}
-
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              gap: "10px",
-              marginTop: "20px",
-            }}
-          >
-            {isBackConfirmation ? (
-              <>
-                <button onClick={confirmBack} style={commonButtonStyle}>
-                  Save Draft
-                </button>
-                <button
-                  onClick={cancelBack}
-                  style={{ ...commonButtonStyle, backgroundColor: "#f44336" }}
-                >
-                  Discard
-                </button>
-              </>
-            ) : (
-              <>
-                <button onClick={handleSaveTags} style={commonButtonStyle}>
-                  Save Tags
-                </button>
-                <button
-                  onClick={cancelBack}
-                  style={{ ...commonButtonStyle, backgroundColor: "#f44336" }}
-                >
-                  Cancel
-                </button>
-              </>
-            )}
           </div>
         </div>
       )}

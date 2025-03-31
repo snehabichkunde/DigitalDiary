@@ -1,0 +1,316 @@
+/* AddStory.css */
+
+.add-story-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #fdf4dc;
+    font-family: Georgia, 'Times New Roman', serif;
+    padding: 20px;
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    margin-left: 250px;
+    width: calc(100% - 250px);
+  }
+  
+  .date-display {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 1rem;
+    font-family: Georgia, 'Times New Roman', serif;
+    color: #001a33;
+  }
+  
+  .title-section {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .title-label {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #001a33;
+    margin-right: 10px;
+  }
+  
+  .title-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 1.2rem;
+    font-family: Georgia, 'Times New Roman', serif;
+    background: transparent;
+    color: #001a33;
+    line-height: 24px;
+    padding: 10px;
+    margin-bottom: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .story-form {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .content-container {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .content-textarea {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 1.2rem;
+    font-family: Georgia, 'Times New Roman', serif;
+    background: transparent;
+    color: #001a33;
+    resize: none;
+    line-height: 24px;
+    padding: 10px;
+    margin-top: 10px;
+    min-height: 300px;
+  }
+  
+  .word-count {
+    text-align: right;
+    font-size: 0.9rem;
+    color: #666;
+    padding: 5px 10px;
+  }
+  
+  .button-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+    justify-content: flex-start;
+  }
+  
+  .primary-button {
+    background-color: #001a33;
+    color: white;
+    padding: 8px 16px;
+    font-size: 1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: Georgia, 'Times New Roman', serif;
+    width: 100%;
+    max-width: 200px;
+    transition: background-color 0.3s;
+  }
+  
+  .primary-button:hover {
+    background-color: #002d4d;
+  }
+  
+  .primary-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+  
+  .secondary-button {
+    background-color: #f44336;
+    color: white;
+    padding: 8px 16px;
+    font-size: 1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: Georgia, 'Times New Roman', serif;
+    width: 100%;
+    max-width: 200px;
+    transition: background-color 0.3s;
+  }
+  
+  .secondary-button:hover {
+    background-color: #d32f2f;
+  }
+  
+  .tertiary-button {
+    background-color: #e0e0e0;
+    color: #001a33;
+    padding: 8px 16px;
+    font-size: 1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: Georgia, 'Times New Roman', serif;
+    width: 100%;
+    max-width: 200px;
+    transition: background-color 0.3s;
+  }
+  
+  .tertiary-button:hover {
+    background-color: #c0c0c0;
+  }
+  
+  .recording-button {
+    background-color: #f44336;
+  }
+  
+  .recording-status {
+    margin-top: 10px;
+    color: #001a33;
+    font-weight: normal;
+  }
+  
+  .recording-status.recording {
+    font-weight: bold;
+  }
+  
+  .error-text {
+    color: red;
+  }
+  
+  .recording-indicator {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: rgba(0, 26, 51, 0.1);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .recording-pulse-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #f44336;
+    animation: pulse 1s infinite;
+  }
+  
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 450px;
+    text-align: center;
+  }
+  
+  .modal-title {
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #001a33;
+  }
+  
+  .error-message {
+    color: #f44336;
+    margin-bottom: 20px;
+  }
+  
+  .tags-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+    justify-content: center;
+    padding: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  .tag-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #001a33;
+    text-transform: capitalize;
+    padding: 5px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+  }
+  
+  .tag-label:hover {
+    background-color: #f5f5f5;
+  }
+  
+  .tag-checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: #001a33;
+    cursor: pointer;
+  }
+  
+  .modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+  
+  .browser-compatibility-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    padding: 20px;
+  }
+  
+  /* Animations */
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+  }
+  
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .add-story-container {
+      margin-left: 0;
+      width: 100%;
+    }
+    
+    .title-section {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .modal-content {
+      width: 95%;
+      padding: 15px;
+    }
+    
+    .tag-label {
+      font-size: 0.9rem;
+    }
+    
+    .primary-button, .secondary-button, .tertiary-button {
+      font-size: 0.9rem;
+      padding: 6px 12px;
+    }
+  }
