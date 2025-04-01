@@ -10,8 +10,9 @@
     position: relative;
     background-size: cover;
     background-position: center;
-    margin-left: 250px;
+    margin-left: 250px; /* Default for desktop with sidebar */
     width: calc(100% - 250px);
+    transition: margin-left 0.3s ease, width 0.3s ease; /* Smooth transition for shifting */
   }
   
   .date-display {
@@ -288,28 +289,43 @@
     100% { opacity: 1; }
   }
   
-  /* Responsive design */
+  /* Responsive Design */
+  @media (min-width: 769px) {
+    .add-story-container {
+      margin-left: 250px; /* Fixed sidebar width on desktop */
+      width: calc(100% - 250px);
+    }
+  }
+  
   @media (max-width: 768px) {
     .add-story-container {
-      margin-left: 0;
+      margin-left: 0; /* No sidebar by default on mobile */
       width: 100%;
     }
-    
+  
+    /* Push content when sidebar is open */
+    .sidebar.open ~ .add-story-container {
+      margin-left: 250px;
+      width: calc(100% - 250px);
+    }
+  
     .title-section {
       flex-direction: column;
       align-items: flex-start;
     }
-    
+  
     .modal-content {
       width: 95%;
       padding: 15px;
     }
-    
+  
     .tag-label {
       font-size: 0.9rem;
     }
-    
-    .primary-button, .secondary-button, .tertiary-button {
+  
+    .primary-button,
+    .secondary-button,
+    .tertiary-button {
       font-size: 0.9rem;
       padding: 6px 12px;
     }
