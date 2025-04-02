@@ -170,7 +170,7 @@ const StoryDetail = () => {
     setIsUnsaved(true);
   };
 
-  const startRecording = async () => {
+  const toggleRecording = async () => {
     if (isBrave || !browserSupportsSpeechRecognition) {
       setRecordingStatus("Speech recognition is not supported in this browser. Use Chrome instead.");
       return;
@@ -179,40 +179,24 @@ const StoryDetail = () => {
       setRecordingStatus("Please switch to edit mode to record.");
       return;
     }
-    try {
-      await navigator.mediaDevices.getUserMedia({ audio: true });
-      SpeechRecognition.startListening({
-        continuous: true,
-        language: "en-IN",
-      });
-      setRecordingStatus("Recording... Speak your story.");
-    } catch (error) {
-      setRecordingStatus("Microphone access denied. Check permissions.");
+    if (!listening) {
+      try {
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+        SpeechRecognition.startListening({
+          continuous: true,
+          language: "en-IN",
+        });
+        setRecordingStatus("Recording... Speak your story.");
+      } catch (error) {
+        setRecordingStatus("Microphone access denied. Check permissions.");
+      }
+    } else {
+      SpeechRecognition.stopListening();
+      setEditedContent((prev) => (prev ? `${prev} ${transcript}` : transcript));
+      setIsUnsaved(true);
+      setRecordingStatus("Recording stopped. Your speech has been added.");
+      resetTranscript();
     }
-  };
-
-  const pauseRecording = () => {
-    SpeechRecognition.stopListening();
-    setEditedContent((prev) => (prev ? `${prev} ${transcript}` : transcript));
-    setIsUnsaved(true);
-    setRecordingStatus("Recording paused. Resume or stop to continue.");
-    resetTranscript();
-  };
-
-  const resumeRecording = () => {
-    SpeechRecognition.startListening({
-      continuous: true,
-      language: "en-IN",
-    });
-    setRecordingStatus("Recording resumed... Speak your story.");
-  };
-
-  const stopRecording = () => {
-    SpeechRecognition.stopListening();
-    setEditedContent((prev) => (prev ? `${prev} ${transcript}` : transcript));
-    setIsUnsaved(true);
-    setRecordingStatus("Recording stopped. Your speech has been added.");
-    resetTranscript();
   };
 
   useEffect(() => {
@@ -258,9 +242,13 @@ const StoryDetail = () => {
                 setIsUnsaved(true);
               }}
               className="content-textarea"
+              style={{ height: "200px", overflowY: "auto" }} // Smaller height, scrollable
             />
           ) : (
-            <p className="content-textarea" style={{ border: "none" }}>
+            <p
+              className="content-textarea"
+              style={{ border: "none", height: "200px", overflowY: "auto" }} // Matching smaller height, scrollable
+            >
               {story.content}
             </p>
           )}
@@ -289,30 +277,16 @@ const StoryDetail = () => {
               <button onClick={handleSubmit} className="primary-button">
                 Submit
               </button>
-              {!listening ? (
-                <button
-                  onClick={startRecording}
-                  disabled={isBrave || !browserSupportsSpeechRecognition}
-                  className="primary-button"
-                  style={{
-                    backgroundColor: isBrave || !browserSupportsSpeechRecognition ? "#cccccc" : "#001a33",
-                  }}
-                >
-                  Record Story
-                </button>
-              ) : (
-                <>
-                  <button onClick={pauseRecording} className="primary-button" style={{ backgroundColor: "#FFA500" }}>
-                    Pause Recording
-                  </button>
-                  <button onClick={resumeRecording} className="primary-button" style={{ backgroundColor: "#2196F3" }}>
-                    Resume Recording
-                  </button>
-                  <button onClick={stopRecording} className="recording-button">
-                    Stop Recording
-                  </button>
-                </>
-              )}
+              <button
+                onClick={toggleRecording}
+                disabled={isBrave || !browserSupportsSpeechRecognition}
+                className={`record-button ${listening ? "recording" : ""}`}
+                style={{
+                  backgroundColor: isBrave || !browserSupportsSpeechRecognition ? "#cccccc" : undefined,
+                }}
+              >
+                {listening ? "Stop Recording" : "Start Recording"}
+              </button>
             </>
           ) : (
             <>
