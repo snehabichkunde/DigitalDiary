@@ -1,101 +1,135 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate, useLocation } from "react-router-dom";
-import "./Login.css";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../context/ContextProvider";
+import "./Login.css";
 
-function Login() {
+const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [error, setError] = useState(""); 
+    const [error, setError] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
     const { user, login } = useAuth();
 
-    // Store last visited page in sessionStorage
     useEffect(() => {
         if (location.pathname !== "/login" && location.pathname !== "/register") {
             sessionStorage.setItem("lastPath", location.pathname);
         }
     }, [location]);
 
-    // Check if user is logged in and redirect accordingly
     useEffect(() => {
         const token = localStorage.getItem("token");
-        if (token) {
+        if (token && !user) {
             axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
             const userData = JSON.parse(localStorage.getItem("user"));
-            if (userData && !user) {
-                login(userData);
-                const lastPath = sessionStorage.getItem("lastPath") || "/home"; // Default to home
-                navigate(lastPath);
-            }
-        } else {
+            login(userData);
+            navigate(sessionStorage.getItem("lastPath") || "/home");
+        } else if (!token && location.pathname !== "/login") {
             navigate("/login");
         }
-    }, [navigate, login, user]);
+    }, [navigate, login, user, location.pathname]);
 
-    // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
+        if (!email || !/\S+@\S+\.\S+/.test(email)) {
+            setError("Please enter a valid email.");
+            return;
+        }
+        if (!password || password.length < 6) {
+            setError("Password must be at least 6 characters.");
+            return;
+        }
 
+        setIsLoading(true);
         try {
-            const response = await axios.post("https://digitaldiary-vkw0.onrender.com/api/auth/login", {
-                email,
-                password,
-            });
-
-            if (response.data.message === "Login successful") {
-                const token = response.data.token;
-                const userData = response.data.user;
-
-                if (token) {
-                    localStorage.setItem("token", token);
-                    localStorage.setItem("user", JSON.stringify(userData));
-                    login(userData);
-
-                    // Redirect to last visited path
-                    const lastPath = sessionStorage.getItem("lastPath") || "/home";
-                    navigate(lastPath);
-                }
+            const { data } = await axios.post(
+                "https://digitaldiary-vkw0.onrender.com/api/auth/login",
+                { email, password }
+            );
+            if (data.message === "Login successful") {
+                localStorage.setItem("token", data.token);
+                localStorage.setItem("user", JSON.stringify(data.user));
+                login(data.user);
+                navigate(sessionStorage.getItem("lastPath") || "/home");
             } else {
-                setError(response.data.message);
+                setError(data.message);
             }
         } catch (err) {
-            console.error("Error logging in:", err);
-            setError("An error occurred during login. Please try again.");
+            setError(
+                err.response?.status === 401
+                    ? "Invalid email or password."
+                    : "An error occurred. Please try again."
+            );
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
-        <div className="login-page">
-            <div className="content-container">
-                <div className="login-box">
-                    <h1>E-Diary</h1>
-                    <form onSubmit={handleSubmit}>
-                        <input
-                            type="email"
-                            placeholder="Email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                        />
-                        <input
-                            type="password"
-                            placeholder="Password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
+        <div className="auth-page">
+            <div className="auth-container">
+                <div className="auth-box">
+                    <h1 className="auth-title">E-Diary</h1>
+                    <form onSubmit={handleSubmit} className="auth-form">
+                        <div className="input-group">
+                            <label htmlFor="email" className="sr-only">Email</label>
+                            <input
+                                id="email"
+                                type="email"
+                                placeholder="Email"
+                                value={email}
+                                onChange={(e) => {
+                                    setEmail(e.target.value.trim());
+                                    setError("");
+                                }}
+                                disabled={isLoading}
+                                className="auth-input"
+                            />
+                        </div>
+                        <div className="input-group password-container">
+                            <label htmlFor="password" className="sr-only">Password</label>
+                            <input
+                                id="password"
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Password"
+                                value={password}
+                                onChange={(e) => {
+                                    setPassword(e.target.value.trim());
+                                    setError("");
+                                }}
+                                disabled={isLoading}
+                                className="auth-input"
+                            />
+                            <button
+                                type="button"
+                                className="toggle-password"
+                                onClick={() => setShowPassword(!showPassword)}
+                                disabled={isLoading}
+                            >
+                                {showPassword ? "Hide" : "Show"}
+                            </button>
+                        </div>
                         {error && <p className="error-message">{error}</p>}
-                        <button type="submit">Log In</button>
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="auth-button"
+                        >
+                            {isLoading ? "Logging in..." : "Log In"}
+                        </button>
                     </form>
                     <div className="divider">
                         <hr />
                         <span>OR</span>
                         <hr />
                     </div>
-                    <p className="signup-text">
-                        Don't have an account? <a href="/register">Sign up</a>
+                    <p className="auth-switch">
+                        Don't have an account?{" "}
+                        <Link to="/register" className="auth-link">Sign Up</Link>
                     </p>
                 </div>
                 <div className="info-box">
@@ -111,6 +145,6 @@ function Login() {
             </div>
         </div>
     );
-}
+};
 
 export default Login;

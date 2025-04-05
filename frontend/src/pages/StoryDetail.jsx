@@ -3,7 +3,7 @@ import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import NavBar from "../components/NavBar";
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
-import "./AddStory.css"; 
+import "./AddStory.css";
 
 const StoryDetail = () => {
   const { id } = useParams();
@@ -46,13 +46,10 @@ const StoryDetail = () => {
       }
     };
 
-    if (id) {
-      fetchStory();
-    }
+    if (id) fetchStory();
 
     const userAgent = navigator.userAgent;
-    const isBraveBrowser =
-      userAgent.includes("Chrome") && navigator.brave?.isBrave?.name === "isBrave";
+    const isBraveBrowser = userAgent.includes("Chrome") && navigator.brave?.isBrave?.name === "isBrave";
     setIsBrave(isBraveBrowser);
     if (isBraveBrowser || !browserSupportsSpeechRecognition) {
       setRecordingStatus("Speech recognition is not supported in this browser.");
@@ -72,16 +69,12 @@ const StoryDetail = () => {
     try {
       const response = await axios.put(
         `https://digitaldiary-vkw0.onrender.com/api/storyRoutes/${id}`,
-        {
-          content: editedContent,
-          ...editedTags,
-          isDraft: false,
-        }
+        { content: editedContent, ...editedTags, isDraft: false }
       );
       setIsEditing(false);
       setIsUnsaved(false);
-      setStory((prevStory) => ({
-        ...prevStory,
+      setStory((prev) => ({
+        ...prev,
         content: editedContent,
         ...editedTags,
         isDraft: false,
@@ -94,24 +87,20 @@ const StoryDetail = () => {
   };
 
   const handleBackClick = () => {
-    if (isUnsaved) {
-      setShowAlert(true);
-    } else {
-      navigate("/home");
-    }
+    if (isUnsaved) setShowAlert(true);
+    else navigate("/home");
   };
 
   const saveAsDraft = async () => {
     try {
-      const response = await axios.put(`https://digitaldiary-vkw0.onrender.com/api/storyRoutes/${id}`, {
-        content: editedContent,
-        ...editedTags,
-        isDraft: true,
-      });
+      const response = await axios.put(
+        `https://digitaldiary-vkw0.onrender.com/api/storyRoutes/${id}`,
+        { content: editedContent, ...editedTags, isDraft: true }
+      );
       setIsUnsaved(false);
       setShowAlert(false);
-      setStory((prevStory) => ({
-        ...prevStory,
+      setStory((prev) => ({
+        ...prev,
         content: editedContent,
         ...editedTags,
         isDraft: true,
@@ -128,9 +117,7 @@ const StoryDetail = () => {
     navigate("/home");
   };
 
-  const cancelBack = () => {
-    setShowAlert(false);
-  };
+  const cancelBack = () => setShowAlert(false);
 
   const handleViewTags = () => {
     setIsViewingTags(true);
@@ -141,14 +128,10 @@ const StoryDetail = () => {
     try {
       const response = await axios.put(
         `https://digitaldiary-vkw0.onrender.com/api/storyRoutes/${id}`,
-        {
-          content: editedContent,
-          ...editedTags,
-          isDraft: story.isDraft,
-        }
+        { content: editedContent, ...editedTags, isDraft: story.isDraft }
       );
-      setStory((prevStory) => ({
-        ...prevStory,
+      setStory((prev) => ({
+        ...prev,
         ...editedTags,
         createdAt: response.data.createdAt,
       }));
@@ -166,7 +149,7 @@ const StoryDetail = () => {
 
   const handleTagChange = (e) => {
     const { name, checked } = e.target;
-    setEditedTags((prevTags) => ({ ...prevTags, [name]: checked }));
+    setEditedTags((prev) => ({ ...prev, [name]: checked }));
     setIsUnsaved(true);
   };
 
@@ -182,10 +165,7 @@ const StoryDetail = () => {
     if (!listening) {
       try {
         await navigator.mediaDevices.getUserMedia({ audio: true });
-        SpeechRecognition.startListening({
-          continuous: true,
-          language: "en-IN",
-        });
+        SpeechRecognition.startListening({ continuous: true, language: "en-IN" });
         setRecordingStatus("Recording... Speak your story.");
       } catch (error) {
         setRecordingStatus("Microphone access denied. Check permissions.");
@@ -207,103 +187,89 @@ const StoryDetail = () => {
         return message;
       }
     };
-
     window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isUnsaved]);
 
-  if (!story) {
-    return <p>Loading...</p>;
-  }
+  if (!story) return <div className="story-page"><NavBar /><p>Loading...</p></div>;
 
   return (
-    <div className="add-story-container">
+    <div className="story-page">
       <NavBar />
-      <div className="date-display">
-        {new Date(story.createdAt).toLocaleDateString("en-US")}
-      </div>
-
-      <div className="title-section">
-        <label className="title-label">Title:</label>
-        <h1 className="title-input" style={{ flex: "none", border: "none" }}>
-          {story.title}
-        </h1>
-      </div>
-
-      <div className="story-form">
-        <div className="content-container">
-          {isEditing ? (
-            <textarea
-              value={listening ? `${editedContent} ${transcript}` : editedContent}
-              onChange={(e) => {
-                setEditedContent(e.target.value);
-                setIsUnsaved(true);
-              }}
-              className="content-textarea"
-              style={{ height: "200px", overflowY: "auto" }} // Smaller height, scrollable
-            />
-          ) : (
-            <p
-              className="content-textarea"
-              style={{ border: "none", height: "200px", overflowY: "auto" }} // Matching smaller height, scrollable
-            >
-              {story.content}
-            </p>
-          )}
-          {recordingStatus && isEditing && (
-            <p className={`recording-status ${recordingStatus.includes("denied") || recordingStatus.includes("supported") ? "error-text" : ""}`}>
-              {recordingStatus}
-            </p>
-          )}
-          {listening && (
-            <div className="recording-indicator">
-              <span>🎙️ Recording in progress...</span>
-              <div className="recording-pulse-dot" />
+      <div className="story-container">
+        <div className="story-box">
+          <div className="date-display">
+            {new Date(story.createdAt).toLocaleDateString("en-US")}
+          </div>
+          <div className="title-section">
+            <label className="title-label">Title</label>
+            <h1 className="title-input">{story.title}</h1>
+          </div>
+          <div className="story-form">
+            <div className="content-section">
+              {isEditing ? (
+                <textarea
+                  value={listening ? `${editedContent} ${transcript}` : editedContent}
+                  onChange={(e) => {
+                    setEditedContent(e.target.value);
+                    setIsUnsaved(true);
+                  }}
+                  className="content-textarea"
+                />
+              ) : (
+                <p className="content-textarea content-view">{story.content}</p>
+              )}
+              {recordingStatus && isEditing && (
+                <p
+                  className={`recording-status ${recordingStatus.includes("denied") || recordingStatus.includes("supported") ? "error" : ""}`}
+                >
+                  {recordingStatus}
+                </p>
+              )}
+              {listening && (
+                <div className="recording-indicator">
+                  <span>🎙️ Recording in progress...</span>
+                  <div className="pulse-dot" />
+                </div>
+              )}
             </div>
-          )}
-        </div>
-
-        <div className="button-container" style={{ position: "absolute", bottom: "20px", left: "20px", right: "20px", justifyContent: "center" }}>
-          <button onClick={handleBackClick} className="primary-button">
-            Back
-          </button>
-          <button onClick={handleViewTags} className="primary-button">
-            View/Edit Tags
-          </button>
-          {isEditing ? (
-            <>
-              <button onClick={handleSubmit} className="primary-button">
-                Submit
+            <div className="button-group">
+              <button onClick={handleBackClick} className="story-button">
+                Back
               </button>
-              <button
-                onClick={toggleRecording}
-                disabled={isBrave || !browserSupportsSpeechRecognition}
-                className={`record-button ${listening ? "recording" : ""}`}
-                style={{
-                  backgroundColor: isBrave || !browserSupportsSpeechRecognition ? "#cccccc" : undefined,
-                }}
-              >
-                {listening ? "Stop Recording" : "Start Recording"}
+              <button onClick={handleViewTags} className="story-button">
+                View/Edit Tags
               </button>
-            </>
-          ) : (
-            <>
-              <button onClick={() => setIsEditing(true)} className="primary-button">
-                Edit
-              </button>
-              <button onClick={handleDelete} className="secondary-button">
-                Delete
-              </button>
-            </>
-          )}
+              {isEditing ? (
+                <>
+                  <button onClick={handleSubmit} className="story-button">
+                    Submit
+                  </button>
+                  <button
+                    onClick={toggleRecording}
+                    disabled={isBrave || !browserSupportsSpeechRecognition}
+                    className={`record-button ${listening ? "recording" : ""}`}
+                  >
+                    {listening ? "Stop Recording" : "Record Story"}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button onClick={() => setIsEditing(true)} className="story-button">
+                    Edit
+                  </button>
+                  <button onClick={handleDelete} className="secondary-button">
+                    Delete
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
         </div>
       </div>
-
       {showAlert && (
-        <div className="modal-overlay">
-          <div className="modal-content">
+        <div className="modal-overlay" onClick={isViewingTags ? closeTagModal : cancelBack}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             {isViewingTags ? (
               <>
                 <h2 className="modal-title">Edit Tags</h2>
@@ -322,20 +288,20 @@ const StoryDetail = () => {
                   ))}
                 </div>
                 <div className="modal-buttons">
-                  <button onClick={handleSaveTags} className="primary-button">
+                  <button onClick={handleSaveTags} className="story-button">
                     Save Tags
                   </button>
-                  <button onClick={closeTagModal} className="primary-button">
+                  <button onClick={closeTagModal} className="secondary-button">
                     Close
                   </button>
                 </div>
               </>
             ) : (
               <>
-                <h2 className="modal-title">Save before leaving?</h2>
-                <p>You have unsaved changes. Would you like to save them as a draft before leaving?</p>
+                <h2 className="modal-title">Save Before Leaving?</h2>
+                <p>You have unsaved changes. Would you like to save them as a draft?</p>
                 <div className="modal-buttons">
-                  <button onClick={saveAsDraft} className="primary-button">
+                  <button onClick={saveAsDraft} className="story-button">
                     Save as Draft
                   </button>
                   <button onClick={confirmBack} className="secondary-button">

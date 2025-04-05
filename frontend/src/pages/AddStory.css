@@ -1,241 +1,272 @@
-/* AddStory.css */
+:root {
+  --primary-color: #ff6f61; /* Coral for buttons */
+  --hover-color: #e65b50;
+  --background-light: #f8f1e9; /* Soft parchment */
+  --text-dark: #2d2d2d;
+  --text-muted: #6b7280;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  --border-radius: 10px;
+  --stitch-color: #d1d5db;
+}
 
-.add-story-container {
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Lora", "Arial", serif; /* Professional serif font */
+  background: linear-gradient(135deg, #ff6f61, #feb47b);
+  color: var(--text-dark);
+}
+
+.story-page {
+  min-height: 100vh;
+  padding: 30px;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  background-color: #fdf4dc;
-  font-family: Georgia, 'Times New Roman', serif;
-  padding: 20px;
-  position: relative;
-  background-size: cover;
-  background-position: center;
   margin-left: 250px;
   width: calc(100% - 250px);
   transition: margin-left 0.3s ease, width 0.3s ease;
 }
 
+.story-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.story-box {
+  background: var(--background-light);
+  padding: 40px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  width: 100%;
+  max-width: 900px;
+  position: relative;
+  border: 1px solid var(--stitch-color);
+  background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png'),
+                    linear-gradient(to bottom right, rgba(255, 255, 255, 0.9), rgba(248, 241, 233, 1)); /* Leather-bound effect */
+  background-blend-mode: overlay;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05), /* Inner shadow */
+              5px 5px 15px rgba(0, 0, 0, 0.1); /* Page curl effect */
+}
+
 .date-display {
   position: absolute;
-  top: 20px;
+  top: 15px;
   right: 20px;
-  font-size: 1rem;
-  font-family: Georgia, 'Times New Roman', serif;
-  color: #001a33;
+  font-size: 14px;
+  color: var(--text-muted);
+  font-family: "Dancing Script", "Arial", sans-serif; /* Elegant handwritten font */
+  letter-spacing: 1px;
 }
 
 .title-section {
   display: flex;
   flex-direction: row;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 30px;
 }
 
 .title-label {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #001a33;
-  margin-right: 10px;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-right: 15px;
+  font-family: "Dancing Script", "Arial", sans-serif;
 }
 
 .title-input {
   flex: 1;
+  font-size: 32px;
+  font-family: "Dancing Script", "Arial", sans-serif;
+  color: var(--text-dark);
   border: none;
-  outline: none;
-  font-size: 1.2rem;
-  font-family: Georgia, 'Times New Roman', serif;
   background: transparent;
-  color: #001a33;
-  line-height: 24px;
-  padding: 10px;
-  margin-bottom: 10px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  padding: 10px 15px;
+  outline: none;
+  border-bottom: 2px solid var(--stitch-color);
+  transition: border-color 0.3s ease;
+}
+
+.title-input:focus {
+  border-bottom-color: var(--primary-color);
 }
 
 .story-form {
-  flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 25px;
 }
 
-.content-container {
+.content-section {
   position: relative;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
 }
 
 .content-textarea {
-  flex: 1;
-  border: none;
+  width: 100%;
+  min-height: 350px;
+  padding: 20px;
+  font-size: 16px;
+  font-family: "Lora", "Arial", serif;
+  border: 1px solid var(--stitch-color);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.7);
+  resize: vertical;
+  color: var(--text-dark);
+  line-height: 1.8;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.content-textarea:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 8px rgba(255, 111, 97, 0.3);
   outline: none;
-  font-size: 1.2rem;
-  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.content-view {
+  border: none;
   background: transparent;
-  color: #001a33;
-  resize: none;
-  line-height: 24px;
-  padding: 10px;
-  margin-top: 10px;
-  min-height: 300px;
+  line-height: 1.8;
 }
 
 .word-count {
   text-align: right;
-  font-size: 0.9rem;
-  color: #666;
-  padding: 5px 10px;
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-top: 8px;
+  font-family: "Dancing Script", "Arial", sans-serif;
 }
 
-.button-container {
+.button-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 20px;
+  gap: 15px;
   justify-content: flex-start;
 }
 
-.primary-button {
-  background-color: #001a33;
-  color: white;
-  padding: 8px 16px;
-  font-size: 1rem;
-  font-weight: bold;
-  border: none;
-  border-radius: 5px;
+.story-button {
+  padding: 12px 25px;
+  font-size: 16px;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--primary-color), var(--hover-color));
+  border: 1px solid var(--stitch-color);
+  border-radius: var(--border-radius);
   cursor: pointer;
-  font-family: Georgia, 'Times New Roman', serif;
-  width: 100%;
-  max-width: 200px;
-  transition: background-color 0.3s, transform 0.2s;
+  font-family: "Dancing Script", "Arial", sans-serif;
+  font-weight: 600;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
 }
 
-.primary-button:hover {
-  background-color: #002d4d;
-  transform: scale(1.02);
+.story-button:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(255, 111, 97, 0.4);
 }
 
-.primary-button:disabled {
-  background-color: #cccccc;
+.story-button:disabled {
+  background: #d1d5db;
   cursor: not-allowed;
-  transform: none;
-}
-
-.secondary-button {
-  background-color: #f44336;
-  color: white;
-  padding: 8px 16px;
-  font-size: 1rem;
-  font-weight: bold;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-family: Georgia, 'Times New Roman', serif;
-  width: 100%;
-  max-width: 200px;
-  transition: background-color 0.3s, transform 0.2s;
-}
-
-.secondary-button:hover {
-  background-color: #d32f2f;
-  transform: scale(1.02);
-}
-
-.tertiary-button {
-  background-color: #e0e0e0;
-  color: #001a33;
-  padding: 8px 16px;
-  font-size: 1rem;
-  font-weight: bold;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-family: Georgia, 'Times New Roman', serif;
-  width: 100%;
-  max-width: 200px;
-  transition: background-color 0.3s, transform 0.2s;
-}
-
-.tertiary-button:hover {
-  background-color: #c0c0c0;
-  transform: scale(1.02);
-}
-
-.record-button {
-  background-color: #001a33;
-  color: white;
-  padding: 10px 20px;
-  font-size: 1rem;
-  font-weight: bold;
-  border: none;
-  border-radius: 25px;
-  cursor: pointer;
-  font-family: Georgia, 'Times New Roman', serif;
-  width: 100%;
-  max-width: 200px;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.record-button.recording {
-  background-color: #f44336;
-}
-
-.record-button:hover {
-  background-color: #002d4d;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-}
-
-.record-button.recording:hover {
-  background-color: #d32f2f;
-}
-
-.record-button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-  transform: none;
   box-shadow: none;
 }
 
-.record-button::before {
-  content: "🎙️";
-  margin-right: 8px;
+.secondary-button {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  padding: 12px 25px;
+  font-size: 16px;
+  color: #ffffff;
+  border: 1px solid var(--stitch-color);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-family: "Dancing Script", "Arial", sans-serif;
+  font-weight: 600;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.secondary-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(239, 68, 68, 0.4);
+}
+
+.tertiary-button {
+  background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+  color: var(--text-dark);
+  padding: 12px 25px;
+  font-size: 16px;
+  border: 1px solid var(--stitch-color);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-family: "Dancing Script", "Arial", sans-serif;
+  font-weight: 600;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.tertiary-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+.record-button {
+  padding: 12px 25px;
+  font-size: 16px;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--primary-color), var(--hover-color));
+  border: 1px solid var(--stitch-color);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-family: "Dancing Script", "Arial", sans-serif;
+  font-weight: 600;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.record-button.recording {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.record-button:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(255, 111, 97, 0.4);
+}
+
+.record-button:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 .recording-status {
   margin-top: 10px;
-  color: #001a33;
-  font-weight: normal;
+  font-size: 14px;
+  color: var(--text-dark);
+  font-family: "Dancing Script", "Arial", sans-serif;
 }
 
-.recording-status.recording {
-  font-weight: bold;
-}
-
-.error-text {
-  color: red;
+.recording-status.error {
+  color: #ef4444;
 }
 
 .recording-indicator {
-  margin-top: 15px;
-  padding: 10px;
-  background-color: rgba(0, 26, 51, 0.1);
-  border-radius: 5px;
+  margin-top: 10px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--text-dark);
+  font-family: "Dancing Script", "Arial", sans-serif;
 }
 
-.recording-pulse-dot {
-  width: 10px;
-  height: 10px;
+.pulse-dot {
+  width: 12px;
+  height: 12px;
+  background: #ef4444;
   border-radius: 50%;
-  background-color: #f44336;
   animation: pulse 1s infinite;
 }
 
@@ -245,7 +276,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -253,77 +284,83 @@
 }
 
 .modal-content {
-  background-color: #fff;
-  padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  background: var(--background-light);
+  padding: 30px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  max-width: 550px;
   width: 90%;
-  max-width: 450px;
   text-align: center;
+  border: 1px solid var(--stitch-color);
+  background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png'),
+                    linear-gradient(to bottom right, rgba(255, 255, 255, 0.9), rgba(248, 241, 233, 1));
+  background-blend-mode: overlay;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05), 5px 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .modal-title {
-  font-size: 1.4rem;
-  font-weight: bold;
-  margin-bottom: 15px;
-  color: #001a33;
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 20px;
+  font-family: "Dancing Script", "Arial", sans-serif;
 }
 
-.error-message {
-  color: #f44336;
+.error {
+  color: #ef4444;
+  font-size: 14px;
   margin-bottom: 20px;
+  font-family: "Lora", "Arial", serif;
 }
 
 .tags-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 10px;
-  justify-content: center;
-  padding: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 12px;
   max-height: 300px;
   overflow-y: auto;
+  padding: 15px 0;
 }
 
 .tag-label {
   display: flex;
   align-items: center;
-  gap: 5px;
-  cursor: pointer;
-  font-size: 1rem;
-  color: #001a33;
+  gap: 8px;
+  font-size: 16px;
+  color: var(--text-dark);
   text-transform: capitalize;
-  padding: 5px;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-}
-
-.tag-label:hover {
-  background-color: #f5f5f5;
+  font-family: "Lora", "Arial", serif;
 }
 
 .tag-checkbox {
-  width: 18px;
-  height: 18px;
-  accent-color: #001a33;
-  cursor: pointer;
+  accent-color: var(--primary-color);
 }
 
 .modal-buttons {
   display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 20px;
   flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 25px;
 }
 
-.browser-compatibility-message {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
+.browser-error {
   text-align: center;
-  padding: 20px;
+  padding: 30px;
+}
+
+.browser-error h2 {
+  font-size: 26px;
+  color: var(--text-dark);
+  margin-bottom: 15px;
+  font-family: "Dancing Script", "Arial", sans-serif;
+}
+
+.browser-error p {
+  font-size: 16px;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+  font-family: "Lora", "Arial", serif;
 }
 
 @keyframes pulse {
@@ -332,38 +369,35 @@
   100% { opacity: 1; }
 }
 
-@media (min-width: 769px) {
-  .add-story-container {
-    margin-left: 250px;
-    width: calc(100% - 250px);
+@media (max-width: 768px) {
+  .story-page {
+      margin-left: 0;
+      width: 100%;
+      padding: 20px;
+  }
+  .story-box {
+      padding: 25px;
+  }
+  .title-section {
+      flex-direction: column;
+      align-items: flex-start;
+  }
+  .title-input {
+      font-size: 24px;
+  }
+  .content-textarea {
+      font-size: 14px;
+      min-height: 300px;
+  }
+  .story-button, .secondary-button, .tertiary-button, .record-button {
+      font-size: 14px;
+      padding: 10px 20px;
   }
 }
 
-@media (max-width: 768px) {
-  .add-story-container {
-    margin-left: 0;
-    width: 100%;
-  }
-  .sidebar.open ~ .add-story-container {
-    margin-left: 250px;
-    width: calc(100% - 250px);
-  }
-  .title-section {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .modal-content {
-    width: 95%;
-    padding: 15px;
-  }
-  .tag-label {
-    font-size: 0.9rem;
-  }
-  .primary-button,
-  .secondary-button,
-  .tertiary-button,
-  .record-button {
-    font-size: 0.9rem;
-    padding: 6px 12px;
+@media (min-width: 769px) {
+  .story-page {
+      margin-left: 250px;
+      width: calc(100% - 250px);
   }
 }
